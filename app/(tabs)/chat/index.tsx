@@ -1,3 +1,4 @@
+import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -31,10 +32,31 @@ export default function ChatList() {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderColor: '#eee' },
-  avatar: { width: 48, height: 48, borderRadius: 24, marginRight: 12 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderColor: COLORS.gray,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.full,
+    marginRight: SPACING.md,
+  },
   info: { flex: 1 },
-  name: { fontWeight: 'bold', fontSize: 16 },
-  message: { color: '#666' },
-  time: { color: '#999', fontSize: 12, marginLeft: 8 },
+  name: {
+    fontWeight: 'bold',
+    fontSize: FONT_SIZES.title,
+  },
+  message: {
+    color: COLORS.black,
+    fontSize: FONT_SIZES.body,
+  },
+  time: {
+    color: COLORS.black,
+    fontSize: FONT_SIZES.xsmall,
+    marginLeft: SPACING.sm,
+  },
 });

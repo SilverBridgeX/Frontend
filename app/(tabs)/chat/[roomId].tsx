@@ -1,9 +1,11 @@
+import AppBar from '@/components/AppBar';
+import { COLORS, FONT_SIZES, INPUT_HEIGHT, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
 import { useNavigation } from '@react-navigation/native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  FlatList,
-  Keyboard,
+  Dimensions,
+  FlatList, Image, Keyboard,
   Pressable,
   StyleSheet,
   Text,
@@ -11,19 +13,22 @@ import {
   View
 } from 'react-native';
 
-const INPUT_HEIGHT = 56;
+const Send = require("../../../assets/images/btn_send.png");
+const DefaultAvatar = require("../../../assets/images/img_profile.png");
 
 interface Message {
   id: string;
   text: string;
   fromMe: boolean;
+  name?: string;      // 상대 이름
+  avatar?: any;       // 상대 프로필 이미지
 }
 
 export default function ChatRoom() {
   const navigation = useNavigation();
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: '안녕하세요!', fromMe: false },
+    { id: '1', text: '안녕하세요!', fromMe: false, name: '상대방', avatar: DefaultAvatar },
     { id: '2', text: '반가워요~', fromMe: true },
   ]);
   const [input, setInput] = useState('');
@@ -72,8 +77,7 @@ export default function ChatRoom() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: `방 ${roomId}` }} />
-
+      <AppBar title="채팅" />
       <FlatList
         ref={listRef}
         data={messages}
@@ -85,35 +89,37 @@ export default function ChatRoom() {
           paddingBottom: listPaddingBottom,
         }}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.bubble,
-              item.fromMe ? styles.myBubble : styles.otherBubble,
-            ]}
-          >
-            <Text style={styles.bubbleText}>{item.text}</Text>
-          </View>
+          item.fromMe ? (
+            <View style={[styles.bubble, styles.myBubble]}>
+              <Text style={styles.bubbleText}>{item.text}</Text>
+            </View>
+          ) : (
+            <View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: SPACING.xs }}>
+                <Image source={item.avatar || DefaultAvatar} style={styles.avatar} />
+                <View>
+                  <Text style={styles.name}>{item.name}</Text>
+                </View>
+              </View>
+              <View style={[styles.bubble, styles.otherBubble, styles.shadowBubble, { marginLeft: 32 }]}>
+                <Text style={styles.bubbleText}>{item.text}</Text>
+              </View>
+            </View>
+          )
         )}
       />
-
-      <View
-        style={{
-          position: 'absolute',
-          bottom: keyboardHeight,
-          left: 0,
-          right: 0,
-        }}
-      >
-        <View style={styles.inputRow}>
+      
+      <View style={[styles.inputWrapper, { bottom: keyboardHeight }]}>
+        <View style={[styles.inputRow, styles.shadowInput]}>
           <TextInput
-            style={[styles.input, { height: INPUT_HEIGHT - 16 }]}
+            style={styles.input}
             value={input}
             onChangeText={setInput}
             placeholder="메시지를 입력하세요"
             onFocus={() => listRef.current?.scrollToEnd({ animated: true })}
           />
-          <Pressable onPress={send} style={styles.sendButton}>
-            <Text style={styles.sendText}>전송</Text>
+          <Pressable onPress={send}>
+            <Image source={Send} style={styles.sendIcon} />
           </Pressable>
         </View>
       </View>
@@ -122,46 +128,74 @@ export default function ChatRoom() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: COLORS.white },
   bubble: {
-    marginVertical: 4,
-    padding: 12,
-    borderRadius: 16,
-    maxWidth: '80%',
+    marginVertical: SPACING.xs,
+    padding: SPACING.md,
+    borderRadius: RADIUS.medium,
   },
   myBubble: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: COLORS.lemon,
     alignSelf: 'flex-end',
+    maxWidth: '50%',
   },
   otherBubble: {
-    backgroundColor: '#888',
+    backgroundColor: COLORS.white,
     alignSelf: 'flex-start',
+    maxWidth: Dimensions.get('window').width * 0.5,
   },
-  bubbleText: { color: '#fff' },
+  bubbleText: { color: COLORS.black },
+    shadowBubble: {
+      ...SHADOWS.bubble
+  },
+  inputWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
   inputRow: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    backgroundColor: '#f9f9f9',
-    borderTopWidth: 1,
-    borderColor: '#ddd',
     alignItems: 'center',
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderRadius: 30,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.md,
     height: INPUT_HEIGHT,
+  },
+  shadowInput: {
+    ...SHADOWS.input
   },
   input: {
     flex: 1,
-    marginRight: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: SPACING.md,
+    fontSize: FONT_SIZES.body,
   },
   sendButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#3b82f6',
-    borderRadius: 20,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.orange,
+    borderRadius: RADIUS.full,
   },
-  sendText: { color: '#fff', fontWeight: 'bold' },
+  sendIcon: {
+    width: 24,
+    height: 24,
+    marginLeft: SPACING.sm,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+    backgroundColor: '#eee',
+  },
+  name: {
+    fontSize: FONT_SIZES.small,
+    color: COLORS.black,
+    fontWeight: 'bold',
+    marginLeft: 2,
+    marginBottom: 2,
+    maxWidth: 120,
+  }
 });
+
