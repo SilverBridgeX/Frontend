@@ -1,4 +1,3 @@
-// components/chat/ChatInput.tsx
 import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/theme';
 import { Message } from '@/types/message';
 import React, { useState } from 'react';
@@ -16,6 +15,7 @@ import useVoiceInput from './useVoiceInput';
 
 const Send = require('../../assets/images/btn_send.png');
 const MicIcon = require('../../assets/images/img_mike.png');
+const PlayIcon = require('../../assets/images/icon_play.png'); // ▶ 아이콘 파일 필요
 
 interface Props {
   onSendMessage: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -24,8 +24,15 @@ interface Props {
 
 export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
   const [input, setInput] = useState('');
-  const { isRecording, startRecording, stopRecording } = useVoiceInput(onSendMessage);
-
+  const {
+    isRecording,
+    startRecording,
+    stopRecording,
+    playLastRecording,
+    lastRecordingUri,
+    // 🔒 추후 STT 서버 전송 로직 사용 시 주석 해제
+  //} = useVoiceInput(onSendMessage);
+    } = useVoiceInput();
   const send = () => {
     if (!input.trim()) return;
     const newMsg: Message = {
@@ -40,11 +47,7 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
   };
 
   const handleVoiceButton = () => {
-    if (isRecording) {
-      stopRecording(); // 👈 다시 누르면 녹음 중단
-    } else {
-      startRecording(); // 👈 첫 클릭 시 녹음 시작
-    }
+    isRecording ? stopRecording() : startRecording();
   };
 
   return (
@@ -56,6 +59,12 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
         placeholder="메시지를 입력하세요"
         onFocus={scrollToEnd}
       />
+
+      {lastRecordingUri && !isRecording && (
+        <Pressable onPress={playLastRecording} style={styles.playButton}>
+          <Image source={PlayIcon} style={styles.playIcon} />
+        </Pressable>
+      )}
 
       {isRecording ? (
         <Pressable onPress={handleVoiceButton} style={styles.recordingUI}>
@@ -102,5 +111,12 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.small,
     color: COLORS.orange,
     marginLeft: 6,
+  },
+  playButton: {
+    marginRight: SPACING.sm,
+  },
+  playIcon: {
+    width: 24,
+    height: 24,
   },
 });
