@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.silverbridge.silveraccompany"
+      "bundleIdentifier": "com.silverbridge.silveraccompany",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "앱에서 음성 녹음을 위해 마이크가 필요합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.silverbridge.silveraccompany"
+      "package": "com.silverbridge.silveraccompany",
+      "permissions": ["RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",
