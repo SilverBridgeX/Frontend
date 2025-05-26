@@ -30,6 +30,7 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: '안녕하세요!', fromMe: false, name: '상대방', avatar: DefaultAvatar },
     { id: '2', text: '반가워요~', fromMe: true },
+    { id: '3', text: '안녕하세요!', fromMe: false, name: '상대방', avatar: DefaultAvatar },
   ]);
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList>(null);
