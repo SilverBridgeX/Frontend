@@ -2,14 +2,14 @@ import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/
 import { Message } from '@/types/message';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    Keyboard,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Image,
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import useVoiceInput from './useVoiceInput';
 
@@ -17,8 +17,17 @@ const Send = require('../../assets/images/btn_send.png');
 const MicIcon = require('../../assets/images/img_mike.png');
 const PlayIcon = require('../../assets/images/icon_play.png'); // ▶ 아이콘 파일 필요
 
+const SENSITIVE_PATTERNS = [
+  { type: '휴대폰 번호', regex: /01[016789]-?\d{3,4}-?\d{4}/ },
+  { type: '주민등록번호', regex: /\d{6}-?[1-4]\d{6}/ },
+  { type: '이메일 주소', regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/ },
+  { type: '신용카드 번호', regex: /\b(?:\d[ -]*?){13,16}\b/ },
+  { type: '계좌번호', regex: /\d{2,3}-\d{2,6}-\d{6,8}/ },
+];
+
+
 interface Props {
-  onSendMessage: React.Dispatch<React.SetStateAction<Message[]>>;
+  onSendMessage: (message: Message) => void;
   scrollToEnd: () => void;
 }
 
@@ -40,7 +49,7 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
       text: input,
       fromMe: true,
     };
-    onSendMessage(prev => [...prev, newMsg]);
+    onSendMessage(newMsg);
     setInput('');
     Keyboard.dismiss();
     scrollToEnd();
@@ -50,12 +59,26 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
     isRecording ? stopRecording() : startRecording();
   };
 
+  const detectSensitiveInfo = (text: string) => {
+  for (const pattern of SENSITIVE_PATTERNS) {
+      if (pattern.regex.test(text)) {
+        alert(`⚠️ ${pattern.type}가 감지되었습니다. 민감한 정보 입력을 피해주세요.`);
+        break;
+      }
+    }
+  };
+
+
   return (
     <View style={[styles.inputRow, styles.shadowInput]}>
       <TextInput
         style={styles.input}
         value={input}
-        onChangeText={setInput}
+        onChangeText={(text) => {
+          setInput(text);
+          detectSensitiveInfo(text);
+      }}
+
         placeholder="메시지를 입력하세요"
         onFocus={scrollToEnd}
       />
