@@ -21,7 +21,7 @@ export const RADIUS = {
   small: 8,
   medium: 16,
   large: 24,
-  full: 999,
+  full: 30,
 };
 
 export const SPACING = {

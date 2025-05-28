@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   },
   message: {
     color: COLORS.black,
-    fontSize: FONT_SIZES.body,
+    fontSize: FONT_SIZES.small,
   },
   time: {
     color: COLORS.black,
