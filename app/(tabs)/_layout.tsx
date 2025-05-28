@@ -67,7 +67,7 @@ export default function TabLayout() {
     }}
   />
   <Tabs.Screen
-    name="explore"
+    name="mypage"
     options={{
       title: '마이',
       tabBarIcon: ({ focused }) =>  (
