@@ -5,4 +5,5 @@ export interface Message {
   fromMe: boolean;
   name?: string;
   avatar?: any;
+  isAI?: boolean; // AI가 보낸 메시지 여부
 }
