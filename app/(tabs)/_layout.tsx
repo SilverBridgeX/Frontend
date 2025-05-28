@@ -2,10 +2,8 @@ import { HapticTab } from '@/components/HapticTab';
 import { COLORS } from '@/constants/theme';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Platform } from 'react-native';
+import { Image, Platform } from 'react-native';
 
-const screenHeight = Dimensions.get('window').height;
-const tabBarHeight = screenHeight * 0.1; // 전체 높이의 10%
 const HomeIcon = require('@/assets/images/tab_home.png');
 const ChatIcon = require('@/assets/images/tab_chat.png');
 const MyIcon = require('@/assets/images/tab_my.png');
@@ -20,13 +18,10 @@ export default function TabLayout() {
       tabBarButton: HapticTab,
       tabBarStyle: Platform.select({
         ios: {
-
-          height: tabBarHeight,
           backgroundColor: COLORS.white,
         }, 
         default: {
           backgroundColor: COLORS.white,
-          height: tabBarHeight,
         },
         
       }),

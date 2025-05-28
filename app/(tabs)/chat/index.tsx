@@ -1,3 +1,4 @@
+import AppBar from '@/components/AppBar';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -11,23 +12,26 @@ const chatRooms = [
 export default function ChatList() {
   const router = useRouter();
   return (
-    <FlatList
-      data={chatRooms}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => router.push(`/chat/${item.id}`)}
-        >
-          <Image source={{ uri: item.avatar }} style={styles.avatar} />
-          <View style={styles.info}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.message} numberOfLines={1}>{item.message}</Text>
-          </View>
-          <Text style={styles.time}>{item.time}</Text>
-        </TouchableOpacity>
-      )}
-    />
+    <View style={{ flex: 1, backgroundColor: COLORS.white }}>
+      <AppBar title="채팅" />
+      <FlatList
+        data={chatRooms}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => router.push(`/chat/${item.id}`)}
+          >
+            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <View style={styles.info}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.message} numberOfLines={1}>{item.message}</Text>
+            </View>
+            <Text style={styles.time}>{item.time}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
 

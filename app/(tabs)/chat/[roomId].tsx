@@ -59,9 +59,13 @@ export default function ChatRoom() {
 
   useEffect(() => {
     const parent = navigation.getParent();
+    // 채팅방 진입 시 바텀탭 숨김
     parent?.setOptions({ tabBarStyle: { display: 'none' } });
-    return () => parent?.setOptions({ tabBarStyle: undefined });
-  }, []);
+    return () => {
+      // 채팅방 나갈 때 바텀탭 원래대로 복구
+      parent?.setOptions({ tabBarStyle: undefined });
+    };
+  }, [navigation]);
 
   useEffect(() => {
     scrollToEnd();
