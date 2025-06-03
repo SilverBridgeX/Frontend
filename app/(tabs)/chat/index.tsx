@@ -46,7 +46,7 @@ export default function ChatList() {
                   pathname: '/chat/[roomId]',
                   params: {
                     roomId: item._id,
-                    isSimulation: item.issimulation?.toString(), // boolean → string 변환 필요
+                    isSimulation: item.isSimulation?.toString(), // boolean → string 변환 필요
                   },
                 })
               }

@@ -5,7 +5,7 @@ import { useCallback, useEffect } from 'react';
 import uuid from 'react-native-uuid';
 import { useAIChatFlow } from './useAIChatFlow';
 
-export const useChatSocket = (roomId: string, userId: string, senderName: string) => {
+export const useChatSocket = (roomId: string, userId: string, senderName: string, isSimulation: string) => {
 
   const {
     socket,
@@ -14,7 +14,7 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
     setAIList,
   } = useChatStore();
 
-  const { handleAIFlow } = useAIChatFlow(roomId);
+  const { handleAIFlow } = useAIChatFlow(roomId, isSimulation);
 
   const handleMessage = useCallback ( async (message: Message) => {
 

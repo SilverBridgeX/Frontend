@@ -26,13 +26,14 @@ export default function ChatRoom() {
 
   const { roomId, isSimulation } = useLocalSearchParams<{
     roomId: string;
-    isSimulation?: string;
+    isSimulation: string;
   }>();
 
   const {
     socketList,
     socket,
     userId,
+    setSimulationPersona,
   } = useChatStore();
 
   const senderName = '나';
@@ -45,7 +46,7 @@ export default function ChatRoom() {
 
   console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
 
-  const { sendMessage } = useChatSocket(roomId, userId, senderName);
+  const { sendMessage } = useChatSocket(roomId, userId, senderName, isSimulation);
 
   if (roomId && userId && senderName) {
     useChatInitializer(roomId, userId, senderName);
@@ -77,17 +78,18 @@ export default function ChatRoom() {
 
     // ✅ isSimulation이 true일 경우 페르소나 불러오기
   useEffect(() => {
+    console.log('isSimulation:', isSimulation);
     if (isSimulation === 'true') {
       chatService.fetchSimulationPersona(roomId)
         .then((persona) => {
           console.log('🧠 시뮬레이션 페르소나:', persona);
-          // TODO: 전역 저장 또는 UI 연동
+          setSimulationPersona(persona); // store에 저장
         })
         .catch((err) => {
           console.error('❌ 페르소나 로딩 실패:', err);
         });
     }
-  }, [roomId, isSimulation]);
+  }, [roomId, isSimulation, setSimulationPersona]);
 
   const handleSendMessage = (content: string) => {
     const newMessage: Message = {

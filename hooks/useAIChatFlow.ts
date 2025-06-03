@@ -1,59 +1,80 @@
-import { sendToAI } from '@/api/aiService';
+import { getSimulationMessage, sendToAI } from '@/api/aiService';
 import { useChatStore } from '@/store/chatStore';
-import { AIResponse, Message } from '@/types/chat';
+import { AIResponse } from '@/types/chat';
+import uuid from 'react-native-uuid';
 
-export const useAIChatFlow = (roomId: string) => {
+export const useAIChatFlow = (roomId: string, isSimulation: string) => {
   const {
     socket,
     recentTopicList,
     iceBreakingAIList,
+    setSocketList,
+    socketList,
     stepNum,
     setStepNum,
-    resetTopicLists
+    resetTopicLists,
+    simulationPersona, // store에서 가져옴
   } = useChatStore.getState();
 
   const handleAIFlow = async () => {
-
     try {
-      const aiResponse: AIResponse = await sendToAI({
-        room_id: roomId,
-        step: stepNum, 
-        message_list: recentTopicList.map(msg => msg.content),
-        icebreaker_message_list: iceBreakingAIList.map(msg => msg.content),
-    });
 
-    const createAIMessage = (text: string): Message => ({
-      roomId,
-      content: text,
-      sender: { name: '재롱이' },
-      isIceBreaker: true,
-      isMyMessage: false,
-      isRead: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+      if (isSimulation === 'true' && simulationPersona) {
+        const recentContents = socketList
+          .map(msg => msg.content)
+          .slice(-10);
 
-      const newTopicMsg: Message = createAIMessage(aiResponse.text);
+        const simulationMessages = await getSimulationMessage(
+          recentContents,
+          simulationPersona,
+          roomId
+        );
 
-      if (aiResponse.state === 'switch') {
-        setStepNum(stepNum + 1);
-        resetTopicLists();
-        socket.emit('messageIB', {
+        // simulationMessages.text를 "재롱이" 메시지로 socketList에 저장
+        const simulationMsg = {
+          id: uuid.v4() as string,
           roomId,
-          senderName: '재롱이',
-          message: aiResponse.text,
-        });
-      } else if (aiResponse.state === 'end') {
-        resetTopicLists();
-        socket.emit('messageIB', {
-          roomId,
-          senderName: '재롱이',
-          message: aiResponse.text,
-        });
+          sender: { name: '재롱이' },
+          content: simulationMessages.text,
+          isRead: false,
+          isMyMessage: false,
+          isIceBreaker: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        // socketList에 추가
+        setSocketList(simulationMsg);
 
-      } else if (!['switch', 'end', 'continue'].includes(aiResponse.state)) {
-        console.warn('⚠️ 알 수 없는 AI 상태값:', aiResponse.state);
       }
+      else {
+        const aiResponse: AIResponse = await sendToAI({
+          room_id: roomId,
+          step: stepNum, 
+          message_list: recentTopicList.map(msg => msg.content),
+          icebreaker_message_list: iceBreakingAIList.map(msg => msg.content),
+        });
+
+        if (aiResponse.state === 'switch') {
+          setStepNum(stepNum + 1);
+          resetTopicLists();
+          socket.emit('messageIB', {
+            roomId,
+            senderName: '재롱이',
+            message: aiResponse.text,
+          });
+        } else if (aiResponse.state === 'end') {
+          resetTopicLists(); 
+          socket.emit('messageIB', {
+            roomId,
+            senderName: '재롱이',
+            message: aiResponse.text,
+          });
+        } else if (!['switch', 'end', 'continue'].includes(aiResponse.state)) {
+          console.warn('⚠️ 알 수 없는 AI 상태값:', aiResponse.state);
+        }
+
+      }
+
 
       // 'continue'는 아무 작업 안 함
     } catch (err) {

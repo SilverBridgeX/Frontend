@@ -16,12 +16,14 @@ export const sendToAI = async (payload: AIRequestPayload): Promise<AIResponse> =
 
 export const getSimulationMessage = async (
   messageList: string[],
-  simulationPersona: any
+  simulationPersona: any,
+  roomId: string
 ): Promise<{ text: string }> => {
   try {
     const res = await axios.post(`${BASE_URL}/simulation/message`, {
       message_list: messageList,
       simulation_persona: simulationPersona,
+      room_id: roomId
     });
     return res.data;
   } catch (error) {

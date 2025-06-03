@@ -9,6 +9,7 @@ interface ChatState {
   stepNum: number;
   socket: Socket;
   userId: string; 
+  simulationPersona: any;
 
   setSocketList: (msg: Message) => void;
   setRecentTopicList: (msg: Message) => void;
@@ -18,6 +19,7 @@ interface ChatState {
   resetSocketList: () => void; 
   setInitialStepNum: (step: number) => void;
   setSocket: (socket: Socket) => void;
+  setSimulationPersona: (persona: any) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -27,6 +29,7 @@ export const useChatStore = create<ChatState>((set) => ({
   iceBreakingAIList: [],
   stepNum: 0,
   socket: null as unknown as Socket,
+  simulationPersona: null,
 
   setSocketList: (msg) =>
     set((state) => ({
@@ -65,4 +68,6 @@ export const useChatStore = create<ChatState>((set) => ({
     set(() => ({
       socket: socket,
     })),
+
+  setSimulationPersona: (persona) => set({ simulationPersona: persona }),
 }));
