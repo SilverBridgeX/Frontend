@@ -6,11 +6,11 @@ import { Socket } from 'socket.io-client';
 
 export default function Index() {
   const socketRef = useRef<Socket | null>(null); 
-  const { setSocket } = useChatStore();
+  const { setSocket, userId } = useChatStore();
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = getSocket(); // ✅ getSocket() 딱 한 번만 실행됨
+      socketRef.current = getSocket(userId); // ✅ getSocket() 딱 한 번만 실행됨
       setSocket(socketRef.current);
     }
   }, []);

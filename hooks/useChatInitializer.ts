@@ -8,11 +8,13 @@ import uuid from 'react-native-uuid';
 export const useChatInitializer = (roomId: string, userId: string, senderName: string) => {
   const {
     socket,
+    iceBreakingAIList,
     setSocketList,
     setRecentTopicList,
     setAIList,
     resetTopicLists,
-    resetSocketList
+    resetSocketList,
+    setStepNum
   } = useChatStore();
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
     const init = async () => {
 
       socket.emit('join', { roomId });
-      
+
       try {
         const messages = await chatService.fetchChatHistory(roomId, userId);
 
@@ -33,8 +35,7 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
         messages.forEach((msg) => {
           const withId = {
              ...msg, 
-             id: uuid.v4(),
-             isMyMessage: msg.sender?.name === senderName,
+             id: uuid.v4()
             };
 
           setSocketList(withId);
@@ -51,6 +52,8 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
             setAIList(msg);
           }
         });
+        setStepNum(iceBreakingAIList.length > 0 ? iceBreakingAIList.length : 1);
+
       } catch (err) {
         console.error('❌ 채팅 기록 초기화 실패:', err);
       }

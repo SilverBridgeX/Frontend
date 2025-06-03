@@ -8,7 +8,7 @@ export const useAIChatFlow = (roomId: string) => {
     recentTopicList,
     iceBreakingAIList,
     stepNum,
-    incrementStepNum,
+    setStepNum,
     resetTopicLists
   } = useChatStore.getState();
 
@@ -36,16 +36,16 @@ export const useAIChatFlow = (roomId: string) => {
       const newTopicMsg: Message = createAIMessage(aiResponse.text);
 
       if (aiResponse.state === 'switch') {
-        incrementStepNum();
-        resetTopicLists();     
-        socket.emit('message', {
+        setStepNum(stepNum + 1);
+        resetTopicLists();
+        socket.emit('messageIB', {
           roomId,
           senderName: '재롱이',
           message: aiResponse.text,
         });
       } else if (aiResponse.state === 'end') {
         resetTopicLists();
-        socket.emit('message', {
+        socket.emit('messageIB', {
           roomId,
           senderName: '재롱이',
           message: aiResponse.text,

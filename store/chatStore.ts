@@ -7,12 +7,13 @@ interface ChatState {
   recentTopicList: Message[];
   iceBreakingAIList: Message[];
   stepNum: number;
-  socket: Socket
+  socket: Socket;
+  userId: string; 
 
   setSocketList: (msg: Message) => void;
   setRecentTopicList: (msg: Message) => void;
   setAIList: (msg: Message) => void;
-  incrementStepNum: () => void;
+  setStepNum: (num: number) => void;
   resetTopicLists: () => void;
   resetSocketList: () => void; 
   setInitialStepNum: (step: number) => void;
@@ -20,6 +21,7 @@ interface ChatState {
 }
 
 export const useChatStore = create<ChatState>((set) => ({
+  userId: '1', // 예시로 고정된 userId, 실제로는 로그인 정보 등에서 가져와야 함
   socketList: [],
   recentTopicList: [],
   iceBreakingAIList: [],
@@ -41,9 +43,9 @@ export const useChatStore = create<ChatState>((set) => ({
       iceBreakingAIList: [...state.iceBreakingAIList, msg],
     })),
 
-  incrementStepNum: () =>
-    set((state) => ({
-      stepNum: state.stepNum + 1,
+  setStepNum: (num) =>
+    set(() => ({
+      stepNum: num,
     })),
 
   resetTopicLists: () =>

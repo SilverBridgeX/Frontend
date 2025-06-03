@@ -3,9 +3,15 @@ import { io, Socket } from 'socket.io-client';
 
 let socket: Socket | null = null;
 
-export const getSocket = (): Socket => {
+
+export const getSocket = (userId:string): Socket => {
+
   if (!socket) {
-    socket = io('http://15.165.17.95');
+    socket = io('http://15.165.17.95', {
+      extraHeaders: {
+        'x-user-id': userId,
+      },
+    });
     console.log('🌐 socket 생성 및 연결');
   }
   return socket;

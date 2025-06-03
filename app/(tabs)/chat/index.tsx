@@ -1,6 +1,7 @@
 import { chatService } from '@/api/chatService';
 import AppBar from '@/components/AppBar';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
+import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -14,7 +15,7 @@ const chatRooms = [
 export default function ChatList() {
   const router = useRouter();
   const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const userId = '101'; // 예시용, 실제 로그인된 사용자 ID로 대체
+  const { userId } = useChatStore();
 
   useEffect(() => {
     const loadRooms = async () => {

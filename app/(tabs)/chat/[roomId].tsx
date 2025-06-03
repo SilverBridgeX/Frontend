@@ -28,8 +28,13 @@ export default function ChatRoom() {
     roomId: string;
     isSimulation?: string;
   }>();
-  
-  const userId = "101";
+
+  const {
+    socketList,
+    socket,
+    userId,
+  } = useChatStore();
+
   const senderName = '나';
   const sender = { id: userId, name: senderName };
   //const roomId = '68381b942a92be361d44eafb';
@@ -37,11 +42,6 @@ export default function ChatRoom() {
   const listRef = useRef<FlatList>(null);
   const noReplyTimerRef = useRef<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-
-  const {
-    socketList,
-    socket
-  } = useChatStore();
 
   console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
 
