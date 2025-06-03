@@ -1,12 +1,12 @@
 import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/theme';
 import { Message, Sender } from '@/types/chat';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   Pressable,
   StyleSheet,
   TextInput,
-  View
+  View,
 } from 'react-native';
 //import useVoiceInput from '../../hooks/useVoiceInput';
 
@@ -33,7 +33,9 @@ interface Props {
   scrollToEnd: () => void;
   roomId: string;
   sender: Sender;
-  userId: string; 
+  userId: string;
+  prefillMessage: string | null;
+  onPrefillHandled: () => void;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
@@ -44,9 +46,23 @@ export default function ChatInput({
   sender,
   userId,
   setMessages,
+  prefillMessage,
+  onPrefillHandled
 }: Props) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasPrefilled, setHasPrefilled] = useState(false); 
+
+  //const [text, setText] = useState('');
+
+  useEffect(() => {
+    if (prefillMessage && !hasPrefilled) {
+      setInput(prefillMessage);       // ✅ 입력창에 메시지 설정
+      setHasPrefilled(true);          // ✅ 더 이상 자동 반영되지 않도록 설정
+      onPrefillHandled();
+    }
+  }, [prefillMessage, hasPrefilled]);
+
 
   /* const {
     isRecording,
@@ -60,6 +76,7 @@ const send = () => {
   if (!input.trim()) return;
   onSendMessage(input);
   setInput('');
+  setHasPrefilled(false); 
   scrollToEnd();
 };
 

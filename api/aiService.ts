@@ -50,4 +50,23 @@ export const createSimulationRoom = async (
   }
 };
 
+export const getAssistantMessage = async (
+  userId: number,
+  roomId: string
+): Promise<{ message: string }> => {
+  try {
+    const res = await axios.get(`${BASE_URL}/assistant`, {
+      params: {
+        userId,
+        roomId
+      }
+    });
+    return res.data;
+  } catch (error) {
+    console.error('❌ 어시스턴트 호출 실패:', error);
+    return { message: '' };
+  }
+};
+
+
 

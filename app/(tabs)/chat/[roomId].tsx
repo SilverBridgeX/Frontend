@@ -1,9 +1,10 @@
 // app/(tabs)/chat/[roomId].tsx
+import { getAssistantMessage } from '@/api/aiService'; // 맨 위 import에 추가
 import { chatService } from '@/api/chatService';
 import AppBar from '@/components/AppBar';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatList from '@/components/chat/ChatList';
-import { COLORS } from '@/constants/theme';
+import { COLORS, SHADOWS } from '@/constants/theme';
 import { useChatInitializer } from '@/hooks/useChatInitializer';
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { useChatStore } from '@/store/chatStore';
@@ -16,6 +17,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -47,6 +49,12 @@ export default function ChatRoom() {
   console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
 
   const { sendMessage } = useChatSocket(roomId, userId, senderName, isSimulation);
+  const [recommendedMessage, setRecommendedMessage] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<string | null>(null); 
+  const handlePrefillHandled = () => {
+  setPrefill(null); // ✅ 입력창에 반영된 후 prefill 초기화
+};
+
 
   if (roomId && userId && senderName) {
     useChatInitializer(roomId, userId, senderName);
@@ -110,14 +118,30 @@ export default function ChatRoom() {
 
     noReplyTimerRef.current = setTimeout(() => {
       handleNoReply(newMessage);
-    }, 60000);
+    }, 10000); // 10초 후 응답 없으면 API 호출
   };
 
-  const handleNoReply = (lastMsg: Message) => {
+  const handleNoReply = async(lastMsg: Message) => {
     const isWaitingForMe = !lastMsg.isMyMessage;
     const waitingTarget = isWaitingForMe ? '나의' : '상대의';
-    console.log(`🚨 1분 동안 ${waitingTarget} 응답 없음 → API 호출!`);
-    // TODO: API 호출
+    console.log(`🚨 30초 동안 ${waitingTarget} 응답 없음 → API 호출!`);
+
+    try {
+      const { message } = await getAssistantMessage(Number(userId), roomId);
+      if (message) {
+        setRecommendedMessage(message); // 💡 추천 메시지로 저장
+      }
+    } catch (error) {
+      console.error('❌ 어시스턴트 응답 실패:', error);
+    }
+  };
+
+  
+  const handleRecommendedClick = () => {
+    if (recommendedMessage) {
+      setPrefill(recommendedMessage);          // 👉 입력창에 값 설정
+      setRecommendedMessage(null);            // 👉 추천 박스 제거
+    }
   };
 
   return (
@@ -130,6 +154,24 @@ export default function ChatRoom() {
         <View style={{ flex: 1, backgroundColor: COLORS.white }}>
           <AppBar title="채팅" />
           <ChatList ref={listRef} messages={socketList} />
+
+          {recommendedMessage && (
+            <TouchableWithoutFeedback onPress={handleRecommendedClick}>
+              <View style={{
+                marginHorizontal: 16,
+                marginBottom: 8,
+                backgroundColor: COLORS.lightLemon,
+                padding: 12,
+                borderRadius: 12, 
+                ...SHADOWS.bubble,
+              }}>
+                <Text style={{ fontSize: 14, color: COLORS.black }}>
+                  💡 {recommendedMessage}
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+          )}
+
           <ChatInput
             onSendMessage={handleSendMessage} // ✅ 여기서만 호출
             scrollToEnd={scrollToEnd}
@@ -137,6 +179,8 @@ export default function ChatRoom() {
             sender={sender}
             userId={userId}
             setMessages={setMessages}
+            prefillMessage={prefill}
+            onPrefillHandled={handlePrefillHandled}
           />
         </View>
       </TouchableWithoutFeedback>
