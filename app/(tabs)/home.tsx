@@ -1,8 +1,9 @@
-// app/(tabs)/home/index.tsx
+import { createSimulationRoom } from '@/api/aiService'; // ✅ 연습방 API import
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
+import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const chatRooms = [
   { id: '1', name: '김순이', message: '오늘 날씨 참 좋네요 ☀️', time: '오전 9:30', avatar: 'https://i.pravatar.cc/100?u=1' },
@@ -12,26 +13,46 @@ const chatRooms = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  console.log('2');
+
+  const {
+    userId,
+    userName,
+    userGender
+  } = useChatStore();
+
+  const handleCreateSimulationRoom = async () => {
+    try {
+      const response = await createSimulationRoom(Number(userId), userName, userGender);
+      if (response.room_id) {
+        Alert.alert('연습모드 생성 완료!', '새로운 연습방이 만들어졌어요 🎉');
+        // router.push(`/chat/${response.room_id}`); // 자동 입장 원하면 주석 해제
+      }
+    } catch (error) {
+      Alert.alert('생성 실패', '연습방 생성에 실패했어요 😢');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* AppBar */}
       <View style={styles.appBar}>
         <Text style={styles.appBarTitle}>은빛 동행</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* "만남 시작하기" 버튼 */}
-        <TouchableOpacity
-          style={styles.startButton}
-          onPress={() => router.push('/match')}
-        >
+        <TouchableOpacity style={styles.startButton} onPress={() => router.push('/match')}>
           <Text style={styles.startButtonText}>만남 시작하기</Text>
         </TouchableOpacity>
 
-        {/* 최신 채팅방 내역 */}
+      {/* 최근 채팅 제목 + 연습모드방 만들기 버튼 */}
+      <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>최근 채팅</Text>
+
+        <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
+          <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
+        </TouchableOpacity>
+      </View>
+
+
         {chatRooms.map((room) => (
           <TouchableOpacity
             key={room.id}
@@ -50,6 +71,7 @@ export default function HomeScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -92,8 +114,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FONT_SIZES.title,
     fontWeight: 'bold',
-    marginBottom: SPACING.md,
-    marginTop: SPACING.xl, // 최근 채팅과 버튼 사이 간격 추가
+    // marginBottom 제거
+    marginTop: 0, // sectionHeader 내부에서 수직 정렬로 대체
+    lineHeight: FONT_SIZES.title + 4, // 세로 중앙에 텍스트 자연스럽게 정렬
   },
   chatRoom: {
     flexDirection: 'row',
@@ -123,4 +146,26 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     fontSize: FONT_SIZES.xsmall,
   },
+  simulationButton: {
+    backgroundColor: COLORS.orange,
+    paddingVertical: 8,        // 높이 키움
+    paddingHorizontal: 16,     // 너비 키움
+    borderRadius: RADIUS.large,
+    marginLeft: 'auto',        // 오른쪽 정렬
+    justifyContent: 'center',  // 버튼 안 텍스트 수직 가운데
+    ...SHADOWS.bubble,
+  },
+  simulationButtonText: {
+    fontSize: FONT_SIZES.small,  // 기존 xsmall → small로 키움
+    color: COLORS.white,
+    fontWeight: 'bold',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',        // 텍스트와 버튼 모두 수직 정렬
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.md,
+    marginHorizontal: SPACING.md,
+  }
+
 });

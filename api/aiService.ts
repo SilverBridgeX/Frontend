@@ -32,3 +32,22 @@ export const getSimulationMessage = async (
   }
 };
 
+export const createSimulationRoom = async (
+  userId: number,
+  userName: string,
+  userGender: string
+): Promise<{ room_id: string }> => {
+  try {
+    const res = await axios.post(`${BASE_URL}/simulation/room`, {
+      user_id: userId,
+      user_name: userName,
+      user_gender: userGender,
+    });
+    return res.data;
+  } catch (error) {
+    console.error('❌ 시뮬레이션 방 생성 실패:', error);
+    return { room_id: '' };
+  }
+};
+
+
