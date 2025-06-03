@@ -7,6 +7,7 @@ import uuid from 'react-native-uuid';
 
 export const useChatInitializer = (roomId: string, userId: string, senderName: string) => {
   const {
+    socket,
     setSocketList,
     setRecentTopicList,
     setAIList,
@@ -15,7 +16,11 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
   } = useChatStore();
 
   useEffect(() => {
+
     const init = async () => {
+
+      socket.emit('join', { roomId });
+      
       try {
         const messages = await chatService.fetchChatHistory(roomId, userId);
 

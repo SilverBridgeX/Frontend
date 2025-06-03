@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { Message } from '../types/chat';
 
@@ -6,6 +7,7 @@ interface ChatState {
   recentTopicList: Message[];
   iceBreakingAIList: Message[];
   stepNum: number;
+  socket: Socket
 
   setSocketList: (msg: Message) => void;
   setRecentTopicList: (msg: Message) => void;
@@ -14,6 +16,7 @@ interface ChatState {
   resetTopicLists: () => void;
   resetSocketList: () => void; 
   setInitialStepNum: (step: number) => void;
+  setSocket: (socket: Socket) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -21,6 +24,7 @@ export const useChatStore = create<ChatState>((set) => ({
   recentTopicList: [],
   iceBreakingAIList: [],
   stepNum: 0,
+  socket: null as unknown as Socket,
 
   setSocketList: (msg) =>
     set((state) => ({
@@ -54,5 +58,9 @@ export const useChatStore = create<ChatState>((set) => ({
     set(() => ({
       stepNum: step,
     })),
-    
+  
+  setSocket: (socket) =>
+    set(() => ({
+      socket: socket,
+    })),
 }));
