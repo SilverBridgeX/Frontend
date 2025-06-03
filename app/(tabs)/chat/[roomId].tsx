@@ -1,9 +1,13 @@
 // app/(tabs)/chat/[roomId].tsx
+import { chatService } from '@/api/chatService';
 import AppBar from '@/components/AppBar';
 import ChatInput from '@/components/chat/ChatInput';
 import ChatList from '@/components/chat/ChatList';
 import { COLORS } from '@/constants/theme';
-import { Message } from '@/types/message';
+import { useChatInitializer } from '@/hooks/useChatInitializer';
+import { useChatSocket } from '@/hooks/useChatSocket';
+import { useChatStore } from '@/store/chatStore';
+import { Message } from '@/types/chat';
 import { useNavigation } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -16,77 +20,87 @@ import {
   View,
 } from 'react-native';
 
-const dummyMessages: Message[] = [
-  {
-    id: '1',
-    text: '저는 임영웅을 좋아해요.',
-    fromMe: false,
-    name: '박춘자',
-  },
-  {
-    id: '2',
-    text: '예 ~. ^^',
-    fromMe: true,
-  },
-  {
-    id: '5',
-    text: '안녕하세요, 대화 도움이 재롱이에요!\n “두분의 요즘 가장 즐거운 취미가 무엇인가요?”',
-    fromMe: false,
-    isAI: true,
-    name: '재롱이',
-  },
-  {
-    id: '3',
-    text: '어제는 좋았다가, 오늘은 또 괜히 울적하네요',
-    fromMe: false,
-    name: '박춘자',
-  },
-  {
-    id: '4',
-    text: '예 ~. ^^',
-    fromMe: true,
-  },
-];
-
 export default function ChatRoom() {
+
+  const { roomId, isSimulation } = useLocalSearchParams<{
+    roomId: string;
+    isSimulation?: string;
+  }>();
+  
+  const userId = "1";
+  const senderName = '나';
+  const sender = { id: userId, name: senderName };
+  //const roomId = '68381b942a92be361d44eafb';
   const navigation = useNavigation();
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const [messages, setMessages] = useState<Message[]>(dummyMessages); // ✅ 초기값 설정
   const listRef = useRef<FlatList>(null);
   const noReplyTimerRef = useRef<number | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const {
+    socketList,
+  } = useChatStore();
+
+  console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
+
+  const { sendMessage } = useChatSocket(roomId, userId, senderName);
+
+  if (roomId && userId && senderName) {
+    useChatInitializer(roomId, userId, senderName);
+  }
 
   const scrollToEnd = () => listRef.current?.scrollToEnd({ animated: true });
 
   useEffect(() => {
     const parent = navigation.getParent();
-    // 채팅방 진입 시 바텀탭 숨김
     parent?.setOptions({ tabBarStyle: { display: 'none' } });
     return () => {
-      // 채팅방 나갈 때 바텀탭 원래대로 복구
       parent?.setOptions({ tabBarStyle: undefined });
     };
   }, [navigation]);
 
   useEffect(() => {
     scrollToEnd();
-  }, [messages]);
+  }, [socketList]);
 
-  const handleNewMessages = (newMessages: Message[]) => {
-    setMessages(prev => [...prev, ...newMessages]);
+    // ✅ isSimulation이 true일 경우 페르소나 불러오기
+  useEffect(() => {
+    if (isSimulation === 'true') {
+      chatService.fetchSimulationPersona(roomId)
+        .then((persona) => {
+          console.log('🧠 시뮬레이션 페르소나:', persona);
+          // TODO: 전역 저장 또는 UI 연동
+        })
+        .catch((err) => {
+          console.error('❌ 페르소나 로딩 실패:', err);
+        });
+    }
+  }, [roomId, isSimulation]);
 
-    const lastMsg = newMessages[newMessages.length - 1];
+  const handleSendMessage = (content: string) => {
+    const newMessage: Message = {
+      roomId,
+      sender,
+      content,
+      isRead: false,
+      isMyMessage: true,
+      isIceBreaker: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    sendMessage(content);
+    // ✅ 메시지는 socket에서 받도록 하며 직접 저장은 하지 않음
 
     if (noReplyTimerRef.current) clearTimeout(noReplyTimerRef.current);
 
     noReplyTimerRef.current = setTimeout(() => {
-      handleNoReply(lastMsg);
+      handleNoReply(newMessage);
     }, 60000);
   };
 
   const handleNoReply = (lastMsg: Message) => {
-    const isWaitingForMe = !lastMsg.fromMe;
+    const isWaitingForMe = !lastMsg.isMyMessage;
     const waitingTarget = isWaitingForMe ? '나의' : '상대의';
-
     console.log(`🚨 1분 동안 ${waitingTarget} 응답 없음 → API 호출!`);
     // TODO: API 호출
   };
@@ -100,10 +114,14 @@ export default function ChatRoom() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, backgroundColor: COLORS.white }}>
           <AppBar title="채팅" />
-          <ChatList ref={listRef} messages={messages} /> 
+          <ChatList ref={listRef} messages={socketList} />
           <ChatInput
-            onSendMessage={(msg: Message) => handleNewMessages([msg])}
+            onSendMessage={handleSendMessage} // ✅ 여기서만 호출
             scrollToEnd={scrollToEnd}
+            roomId={roomId}
+            sender={sender}
+            userId={userId}
+            setMessages={setMessages}
           />
         </View>
       </TouchableWithoutFeedback>

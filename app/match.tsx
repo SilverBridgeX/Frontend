@@ -1,3 +1,4 @@
+import { requestMatching } from '@/api/userService';
 import { COLORS, FONT_SIZES, SPACING } from '@/constants/theme';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
@@ -25,38 +26,71 @@ function MatchComplete() {
   );
 }
 
+
 export default function MatchScreen() {
   const navigation = useNavigation();
   const [matched, setMatched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMatched(true), 5000);
-    return () => clearTimeout(timer);
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const shouldCallAPI = minutes === 20 || minutes === 40 || minutes === 0;
+
+    if (shouldCallAPI) {
+      requestMatching()
+        .then((res) => {
+          if (res?.isSuccess && res.result) {
+            setMatched(true);
+          } else {
+            setError('매칭에 실패했습니다. 잠시 후 다시 시도해주세요.');
+          }
+        })
+        .catch((err) => {
+          console.error('매칭 요청 중 에러:', err);
+          setError('서버에 문제가 발생했습니다. 관리자에게 문의해주세요.');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000); // 짧은 지연 후 메시지 출력
+    }
   }, []);
 
   return (
     <View style={styles.container}>
-      {/* AppBar */}
       <View style={styles.appBar}>
         <Text style={styles.appBarTitle}>만남 매칭</Text>
       </View>
 
-      {!matched ? (
+      {isLoading ? (
         <View style={styles.content}>
-          <Text style={styles.text}>곧 매칭이 시작됩니다...</Text>
+          <Text style={styles.text}>로딩 중...</Text>
           <ActivityIndicator size="large" color={COLORS.black} style={styles.loader} />
         </View>
-      ) : (
+      ) : matched ? (
         <MatchComplete />
+      ) : error ? (
+        <View style={styles.content}>
+          <Text style={styles.text}>{error}</Text>
+        </View>
+      ) : (
+        <View style={styles.content}>
+          <Text style={styles.text}>당신의 친구를 찾는 중입니다...</Text>
+          <ActivityIndicator size="large" color={COLORS.black} style={styles.loader} />
+        </View>
       )}
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -1,6 +1,8 @@
+import { chatService } from '@/api/chatService';
 import AppBar from '@/components/AppBar';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const chatRooms = [
@@ -11,25 +13,54 @@ const chatRooms = [
 
 export default function ChatList() {
   const router = useRouter();
+  const [chatRooms, setChatRooms] = useState<any[]>([]);
+  const userId = '1'; // 예시용, 실제 로그인된 사용자 ID로 대체
+
+  useEffect(() => {
+    const loadRooms = async () => {
+      try {
+        const rooms = await chatService.fetchChatRoomList(userId);
+        setChatRooms(rooms);
+      } catch (error) {
+        console.error('채팅방 목록 로딩 실패:', error);
+      }
+    };
+    loadRooms();
+  }, []);
+
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.white }}>
       <AppBar title="채팅" />
       <FlatList
         data={chatRooms}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => router.push(`/chat/${item.id}`)}
-          >
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.message} numberOfLines={1}>{item.message}</Text>
-            </View>
-            <Text style={styles.time}>{item.time}</Text>
-          </TouchableOpacity>
-        )}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => {
+          const latest = item.latestMessage;
+          const participant = item.participants?.[0]?.name ?? '알 수 없음';
+          return (
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() =>
+                router.push({
+                  pathname: '/chat/[roomId]',
+                  params: {
+                    roomId: item._id,
+                    isSimulation: item.issimulation?.toString(), // boolean → string 변환 필요
+                  },
+                })
+              }
+            >
+              <Image source={{ uri: 'https://i.pravatar.cc/100?u=' + item._id }} style={styles.avatar} />
+              <View style={styles.info}>
+                <Text style={styles.name}>{participant}</Text>
+                <Text style={styles.message} numberOfLines={1}>{latest?.content ?? '메시지 없음'}</Text>
+              </View>
+              <Text style={styles.time}>
+                {latest?.createdAt ? new Date(latest.createdAt).toLocaleDateString() : ''}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );

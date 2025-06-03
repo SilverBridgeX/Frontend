@@ -1,6 +1,6 @@
 // components/chat/ChatList.tsx
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
-import { Message } from '@/types/message';
+import { Message } from '@/types/chat';
 import * as Speech from 'expo-speech';
 import React, { forwardRef } from 'react';
 import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -28,40 +28,41 @@ return (
     keyExtractor={item => item.id}
     contentContainerStyle={{ padding: 8, paddingBottom: 100 }}
     renderItem={({ item }) => (
-      <View style={{ marginBottom: 12 }}> 
-        {item.fromMe ? (
-          <Pressable onPress={() => handleSpeak(item.text)}>
+      <View style={{ marginBottom: 12 }}>
+        {item.isMyMessage ? (
+          <Pressable onPress={() => handleSpeak(item.content)}>
             <View style={[styles.bubble, styles.myBubble]}>
-              <Text style={styles.text}>{item.text}</Text>
+              <Text style={styles.text}>{item.content}</Text>
             </View>
           </Pressable>
-        ) : item.isAI ? (
+        ) : item.isIceBreaker ? (
           <>
             <View style={styles.row}>
               <Image source={AIAvatar} style={styles.aiAvatar} />
-              <Text style={styles.name}>{item.name || 'AI'}</Text>
+              <Text style={styles.name}>{item.sender.name || 'AI'}</Text>
             </View>
-            <Pressable onPress={() => handleSpeak(item.text)}>
+            <Pressable onPress={() => handleSpeak(item.content)}>
               <View style={[styles.bubble, styles.aiBubble]}>
-                <Text style={styles.text}>{item.text}</Text>
+                <Text style={styles.text}>{item.content}</Text>
               </View>
             </Pressable>
           </>
         ) : (
           <>
             <View style={styles.row}>
-              <Image source={item.avatar || DefaultAvatar} style={styles.avatar} />
-              <Text style={styles.name}>{item.name || '사용자'}</Text>
+              <Image source={DefaultAvatar} style={styles.avatar} />
+              <Text style={styles.name}>{item.sender.name || '사용자'}</Text>
             </View>
-            <Pressable onPress={() => handleSpeak(item.text)}>
+            <Pressable onPress={() => handleSpeak(item.content)}>
               <View style={[styles.bubble, styles.otherBubble]}>
-                <Text style={styles.text}>{item.text}</Text>
+                <Text style={styles.text}>{item.content}</Text>
               </View>
             </Pressable>
           </>
         )}
       </View>
     )}
+
   />
 );
 

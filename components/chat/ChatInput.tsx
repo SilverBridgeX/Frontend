@@ -1,25 +1,19 @@
 import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/theme';
-import { Message } from '@/types/message';
+import { Message, Sender } from '@/types/chat';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
   Image,
-  Keyboard,
-  Modal,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
-  TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native';
-import useVoiceInput from './useVoiceInput';
+//import useVoiceInput from '../../hooks/useVoiceInput';
 
 const Send = require('../../assets/images/btn_send.png');
-const MicIcon = require('../../assets/images/img_mike.png');
-const PlayIcon = require('../../assets/images/icon_play.png');
-const ActivityIcon = require('../../assets/images/icon_activity.png');
+//const MicIcon = require('../../assets/images/img_mike.png');
+//const PlayIcon = require('../../assets/images/icon_play.png');
+//const ActivityIcon = require('../../assets/images/icon_activity.png');
 
 const SENSITIVE_PATTERNS = [
   { type: '휴대폰 번호', regex: /01[016789]-?\d{3,4}-?\d{4}/ },
@@ -31,41 +25,48 @@ const SENSITIVE_PATTERNS = [
 
 const categoryToImage: Record<string, any> = {
   산책: require('../../assets/images/activity_walk.png'),
-  축제: require('../../assets/images/activity_festival.png')
+  축제: require('../../assets/images/activity_festival.png'),
 };
 
 interface Props {
-  onSendMessage: (message: Message) => void;
+  onSendMessage: (content: string) => void;
   scrollToEnd: () => void;
+  roomId: string;
+  sender: Sender;
+  userId: string; 
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
+export default function ChatInput({
+  onSendMessage,
+  scrollToEnd,
+  roomId,
+  sender,
+  userId,
+  setMessages,
+}: Props) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const {
+
+  /* const {
     isRecording,
     startRecording,
     stopRecording,
     playLastRecording,
     lastRecordingUri,
-  } = useVoiceInput();
+  } = useVoiceInput(setMessages, roomId, sender); */
 
-  const send = () => {
-    if (!input.trim()) return;
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      text: input,
-      fromMe: true,
-    };
-    onSendMessage(newMsg);
-    setInput('');
-    Keyboard.dismiss();
-    scrollToEnd();
-  };
+const send = () => {
+  if (!input.trim()) return;
+  onSendMessage(input);
+  setInput('');
+  scrollToEnd();
+};
 
-  const handleVoiceButton = () => {
+
+  /* const handleVoiceButton = () => {
     isRecording ? stopRecording() : startRecording();
-  };
+  }; */
 
   const detectSensitiveInfo = (text: string) => {
     for (const pattern of SENSITIVE_PATTERNS) {
@@ -76,17 +77,17 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
     }
   };
 
-  const activitySuggestions = [
+  /* const activitySuggestions = [
     {
       id: '1',
-      name: '2024년 낙동강정원 벚꽃축제 ',
+      name: '2024년 낙동강정원 벚꽃축제',
       location: '낙동제방 벚꽃길 일원, 르네시떼 야외무대',
       time: '2024. 3. 29.(금) ~ 3. 31.(일)',
       category: '산책',
     },
     {
       id: '2',
-      name: '2024년 낙동강정원 벚꽃축제 ',
+      name: '2024년 낙동강정원 벚꽃축제',
       location: '낙동제방 벚꽃길 일원, 르네시떼 야외무대',
       time: '2024. 3. 29.(금) ~ 3. 31.(일)',
       category: '축제',
@@ -98,35 +99,31 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
       time: '내일 오전 10시',
       category: '축제',
     },
-  ];
+  ];*/
 
   return (
     <>
-      <Modal
+      {/* 활동 추천 모달 제거 */}
+      {/* <Modal
         transparent
         visible={showSuggestions}
         animationType="slide"
         onRequestClose={() => setShowSuggestions(false)}
       >
         <View style={styles.modalBackground}>
-          {/* 배경 클릭 시 닫기 */}
           <TouchableWithoutFeedback onPress={() => setShowSuggestions(false)}>
             <View style={{ flex: 1 }} />
           </TouchableWithoutFeedback>
-          {/* 실제 컨텐츠(리스트)는 터치이벤트 막지 않음 */}
           <View style={styles.suggestionsBox}>
             <FlatList
               data={activitySuggestions}
               keyExtractor={(item) => item.id}
               contentContainerStyle={{ paddingVertical: SPACING.lg, paddingHorizontal: SPACING.lg }}
-              showsVerticalScrollIndicator={true}
+              showsVerticalScrollIndicator
               renderItem={({ item }) => (
                 <View style={[styles.card, styles.shadowCard]}>
                   <View style={styles.cardTopRow}>
-                    <Image
-                      source={categoryToImage[item.category]}
-                      style={styles.cardImage}
-                    />
+                    <Image source={categoryToImage[item.category]} style={styles.cardImage} />
                     <Text style={styles.cardTitle}>{item.name}</Text>
                   </View>
                   <Text style={styles.cardLocation}>{item.location}</Text>
@@ -136,12 +133,13 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
             />
           </View>
         </View>
-      </Modal>
+      </Modal> */}
 
       <View style={[styles.inputRow, styles.shadowInput]}>
-        <Pressable onPress={() => setShowSuggestions(true)}>
+        {/* 활동 제안 버튼 제거 */}
+        {/* <Pressable onPress={() => setShowSuggestions(true)}>
           <Image source={ActivityIcon} style={styles.sendIcon} />
-        </Pressable>
+        </Pressable> */}
 
         <TextInput
           style={styles.input}
@@ -154,22 +152,24 @@ export default function ChatInput({ onSendMessage, scrollToEnd }: Props) {
           onFocus={scrollToEnd}
         />
 
-        {lastRecordingUri && !isRecording && (
+        {/* 녹음 파일 재생 버튼 제거 */}
+        {/* {lastRecordingUri && !isRecording && (
           <Pressable onPress={playLastRecording} style={styles.playButton}>
             <Image source={PlayIcon} style={styles.playIcon} />
           </Pressable>
-        )}
+        )} */}
 
-        {isRecording ? (
+        {/* 녹음 중 표시 UI 제거 */}
+        {/* {isRecording ? (
           <Pressable onPress={handleVoiceButton} style={styles.recordingUI}>
             <ActivityIndicator color={COLORS.orange} />
             <Text style={styles.recordingText}>녹음 중...</Text>
           </Pressable>
-        ) : (
-          <Pressable onPress={input.trim() ? send : handleVoiceButton}>
-            <Image source={input.trim() ? Send : MicIcon} style={styles.sendIcon} />
+        ) : ( */}
+          <Pressable onPress={send}>
+            <Image source={Send} style={styles.sendIcon} />
           </Pressable>
-        )}
+        {/* )} */}
       </View>
     </>
   );
@@ -256,13 +256,13 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginTop: 2,
     marginStart: 10,
-    padding: SPACING.xs
+    padding: SPACING.xs,
   },
   cardTime: {
     fontSize: FONT_SIZES.body,
     color: COLORS.black,
     marginTop: 2,
     marginStart: 10,
-    padding: SPACING.xs
+    padding: SPACING.xs,
   },
 });
