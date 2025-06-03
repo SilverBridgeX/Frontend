@@ -40,17 +40,17 @@ export const useAIChatFlow = (roomId: string) => {
         resetTopicLists();     
         socket.emit('message', {
           roomId,
-          sender: { name: '재롱이' },
+          senderName: '재롱이',
           message: aiResponse.text,
         });
       } else if (aiResponse.state === 'end') {
         resetTopicLists();
         socket.emit('message', {
           roomId,
-          sender: { name: '재롱이' },
+          senderName: '재롱이',
           message: aiResponse.text,
         });
-      
+
       } else if (!['switch', 'end', 'continue'].includes(aiResponse.state)) {
         console.warn('⚠️ 알 수 없는 AI 상태값:', aiResponse.state);
       }
