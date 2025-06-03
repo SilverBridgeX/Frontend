@@ -26,8 +26,6 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
     //UI용 리스트에 id와 메세지 추가
     setSocketList(messageWithId);
 
-    handleAIFlow();
-
     //최근 토픽에 메세지 추가
     setRecentTopicList(message);
 
@@ -42,12 +40,12 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
 
     if (!roomId || !userId) return;
 
-      socket.off('message', handleMessage); // 중복 방지
-      socket.on('message', handleMessage);
+    socket.off('message', handleMessage); // 중복 방지
+    socket.on('message', handleMessage);
 
-      socket.on('chat preview', (preview) => {
-        console.log('📰 미리보기 알림:', preview);
-    });
+    socket.on('chat preview', (preview) => {
+      console.log('📰 미리보기 알림:', preview);
+    }); 
 
     socket.on('connect_error', (err) => {
       console.error('❌ 소켓 연결 오류:', err.message);
@@ -73,6 +71,9 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
       senderName,
       message: content,
     });
+
+    handleAIFlow();
+
   };
 
   return { sendMessage };

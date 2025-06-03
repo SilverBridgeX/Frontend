@@ -14,7 +14,7 @@ const chatRooms = [
 export default function ChatList() {
   const router = useRouter();
   const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const userId = '1'; // 예시용, 실제 로그인된 사용자 ID로 대체
+  const userId = '101'; // 예시용, 실제 로그인된 사용자 ID로 대체
 
   useEffect(() => {
     const loadRooms = async () => {

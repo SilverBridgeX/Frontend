@@ -4,14 +4,12 @@ import { AIResponse, Message } from '@/types/chat';
 
 export const useAIChatFlow = (roomId: string) => {
   const {
+    socket,
     recentTopicList,
     iceBreakingAIList,
     stepNum,
     incrementStepNum,
-    resetTopicLists,
-    setRecentTopicList,
-    setAIList,
-    setSocketList
+    resetTopicLists
   } = useChatStore.getState();
 
   const handleAIFlow = async () => {
@@ -39,14 +37,20 @@ export const useAIChatFlow = (roomId: string) => {
 
       if (aiResponse.state === 'switch') {
         incrementStepNum();
-        resetTopicLists();       
-
-        setSocketList(newTopicMsg);
-        setRecentTopicList(newTopicMsg);
-        setAIList(newTopicMsg);
+        resetTopicLists();     
+        socket.emit('message', {
+          roomId,
+          sender: { name: '재롱이' },
+          message: newTopicMsg,
+        });
       } else if (aiResponse.state === 'end') {
         resetTopicLists();
-        setSocketList(newTopicMsg);
+        socket.emit('message', {
+          roomId,
+          sender: { name: '재롱이' },
+          message: newTopicMsg,
+        });
+      
       } else if (!['switch', 'end', 'continue'].includes(aiResponse.state)) {
         console.warn('⚠️ 알 수 없는 AI 상태값:', aiResponse.state);
       }

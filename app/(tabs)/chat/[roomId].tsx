@@ -29,7 +29,7 @@ export default function ChatRoom() {
     isSimulation?: string;
   }>();
   
-  const userId = "1";
+  const userId = "101";
   const senderName = '나';
   const sender = { id: userId, name: senderName };
   //const roomId = '68381b942a92be361d44eafb';
