@@ -41,14 +41,14 @@ export const useAIChatFlow = (roomId: string) => {
         socket.emit('message', {
           roomId,
           sender: { name: '재롱이' },
-          message: newTopicMsg,
+          message: aiResponse.text,
         });
       } else if (aiResponse.state === 'end') {
         resetTopicLists();
         socket.emit('message', {
           roomId,
           sender: { name: '재롱이' },
-          message: newTopicMsg,
+          message: aiResponse.text,
         });
       
       } else if (!['switch', 'end', 'continue'].includes(aiResponse.state)) {
