@@ -22,6 +22,8 @@ import {
 
 export default function ChatRoom() {
 
+  console.log('3');
+
   const { roomId, isSimulation } = useLocalSearchParams<{
     roomId: string;
     isSimulation?: string;
@@ -38,6 +40,7 @@ export default function ChatRoom() {
 
   const {
     socketList,
+    socket
   } = useChatStore();
 
   console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
@@ -49,6 +52,16 @@ export default function ChatRoom() {
   }
 
   const scrollToEnd = () => listRef.current?.scrollToEnd({ animated: true });
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      console.log('📤 방을 진짜로 나갑니다');
+      // leave 이벤트 보냄
+      socket.emit('leave', { roomId });
+    });
+
+    return unsubscribe;
+  }, [navigation, roomId]);
 
   useEffect(() => {
     const parent = navigation.getParent();

@@ -1,20 +1,19 @@
-// app/index.tsx
 import { getSocket } from '@/lib/socketManager';
 import { useChatStore } from '@/store/chatStore';
 import { Redirect } from 'expo-router';
-import { useEffect } from 'react';
-
+import { useEffect, useRef } from 'react';
+import { Socket } from 'socket.io-client';
 
 export default function Index() {
-
-const {
-    setSocket
-  } = useChatStore();
+  const socketRef = useRef<Socket | null>(null); 
+  const { setSocket } = useChatStore();
 
   useEffect(() => {
-    setSocket(getSocket()); // ✅ 앱 시작 시 1회 연결
+    if (!socketRef.current) {
+      socketRef.current = getSocket(); // ✅ getSocket() 딱 한 번만 실행됨
+      setSocket(socketRef.current);
+    }
   }, []);
-  
- return <Redirect href="/home" />;
-  // 슬래시(/) 없이 상대 경로 권장
+
+  return <Redirect href="/home" />;
 }

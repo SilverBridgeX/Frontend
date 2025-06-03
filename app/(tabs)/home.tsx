@@ -12,6 +12,7 @@ const chatRooms = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  console.log('2');
 
   return (
     <View style={styles.container}>
