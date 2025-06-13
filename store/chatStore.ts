@@ -25,8 +25,8 @@ interface ChatState {
 }
 
 export const useChatStore = create<ChatState>((set) => ({
-  userId: '1', // 예시로 고정된 userId, 실제로는 로그인 정보 등에서 가져와야 함
-  userName:'서진',
+  userId: '2525', // 예시로 고정된 userId, 실제로는 로그인 정보 등에서 가져와야 함
+  userName:'상신',
   userGender:'여성',
   socketList: [],
   recentTopicList: [],
