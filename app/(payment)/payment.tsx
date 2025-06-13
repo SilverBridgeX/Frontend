@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const PaymentScreen = () => {
+export default function PaymentScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>은빛동행 결제</Text>
@@ -29,7 +29,7 @@ const PaymentScreen = () => {
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -87,5 +87,3 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
-
-export default PaymentScreen;

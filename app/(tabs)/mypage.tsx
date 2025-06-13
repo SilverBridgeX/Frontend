@@ -1,5 +1,7 @@
 import { COLORS, FONT_SIZES, SPACING } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const MenuItem = ({ icon, label, onPress }: { icon: any; label: string; onPress: () => void }) => (
@@ -11,6 +13,8 @@ const MenuItem = ({ icon, label, onPress }: { icon: any; label: string; onPress:
 );
 
 export default function MyPageScreen() {
+  const navigation: any = useNavigation();
+
   return (
     <ScrollView style={styles.container}>
       {/* 앱바 */}
@@ -31,6 +35,7 @@ export default function MyPageScreen() {
         <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => {}} />
         <MenuItem icon="chatbubble-ellipses-outline" label="1:1 문의" onPress={() => {}} />
         <MenuItem icon="log-out-outline" label="로그아웃" onPress={() => {}} />
+        <MenuItem icon="card-outline" label="프리미엄 결제" onPress={() => router.push('/payment')} />
       </View>
     </ScrollView>
   );
