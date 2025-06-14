@@ -1,6 +1,8 @@
 // screens/SignupScreen.tsx
+import { socialLogin } from '@/api/userService';
 import { COLORS } from '@/constants/theme';
-import { useRouter } from 'expo-router';
+import { EMAIL, ROLE } from '@/constants/user';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -8,10 +10,33 @@ export default function SignupScreen() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const initialRole = params.role === ROLE.OLDER_PROTECTER ? ROLE.OLDER_PROTECTER : ROLE.OLDER;
+  const [role, setRole] = useState(initialRole);
 
-const handleComplete = () => {
-    // 가입 완료 처리 후
-    router.replace('/home'); // 탭 내부 진입
+  const handleComplete = async () => {
+    try {
+        const response = await socialLogin({
+        role,
+        email: EMAIL,
+        nickname: name,
+        streetAddress: address,
+        });
+
+        if (response.isSuccess) {
+        // ✅ 토큰 저장 로직 (선택)
+        console.log('회원가입 성공! accessToken:', response.result.accessToken);
+        // 예: await AsyncStorage.setItem('accessToken', response.result.accessToken);
+
+        router.replace('/login'); // 회원가입 후 로그인 화면으로 이동
+        alert('회원가입 성공! 로그인 화면으로 이동합니다.');
+
+        } else {
+        alert('로그인 실패: ' + response.message);
+        }
+    } catch (error) {
+        alert('에러 발생: ' + error);
+    }
   };
 
   return (

@@ -1,15 +1,45 @@
 // screens/LoginScreen.tsx
+import { loginWithKey } from '@/api/userService'; // 로그인 API 호출 함수
 import { COLORS, SHADOWS } from '@/constants/theme';
+import { ROLE } from '@/constants/user';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
   const [id, setId] = useState('');
+  const [role, setRole] = useState(ROLE.OLDER); // 기본 역할을 '동행자'로 설정
 
-const handleLogin = () => {
+const handleLogin = async () => {
+  if (!id.trim()) {
+    alert('ID를 입력해주세요!');
+    return;
+  }
+
+  try {
+    const response = await loginWithKey(id.trim());
+
+    if (response.isSuccess) {
+      console.log('✅ 로그인 성공:', response.result);
+
+      // 예: 토큰 저장 (AsyncStorage 등으로)
+      // await AsyncStorage.setItem('accessToken', response.result.accessToken);
+
+      router.push('/home');
+    } else {
+      alert(`로그인 실패: ${response.message}`);
+    }
+  } catch (error) {
+    console.error('로그인 에러:', error);
+    alert('로그인 중 오류가 발생했어요!');
+  }
+};
+
+
+const handleJoin = () => {
     // 로그인 로직 (예: ID 확인)
-    router.push('/login/join');
+    router.push({ pathname: '/login/join', params: { role } });
+
   };
 
   return (
@@ -20,24 +50,57 @@ const handleLogin = () => {
       <View style={{ height: 80 }} />
 
       <View style={styles.roleContainer}>
-        <TouchableOpacity style={[styles.roleButton, styles.activeRole]}>
-          <Text style={styles.activeRoleText}>노인</Text>
+        <TouchableOpacity
+          style={[
+            styles.roleButton,
+            role === ROLE.OLDER && styles.activeRole,
+          ]}
+          onPress={() => setRole(ROLE.OLDER)}
+        >
+          <Text
+            style={role === ROLE.OLDER ? styles.activeRoleText : styles.roleText}
+          >
+            동행자
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.roleButton}>
-          <Text style={styles.roleText}>보호자</Text>
+
+        <TouchableOpacity
+          style={[
+            styles.roleButton,
+            role === ROLE.OLDER_PROTECTER && styles.activeRole,
+          ]}
+          onPress={() => setRole(ROLE.OLDER_PROTECTER)}
+        >
+          <Text
+            style={role === ROLE.OLDER_PROTECTER ? styles.activeRoleText : styles.roleText}
+          >
+            보호자
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="ID를 입력해주세요"
-        value={id}
-        onChangeText={setId}
-      />
 
-      <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
-        <Text style={styles.loginButtonText}>로그인</Text>
-      </TouchableOpacity>
+      {role === ROLE.OLDER && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="ID를 입력해주세요"
+            value={id}
+            onChangeText={setId}
+          />
+
+          <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+            <Text style={styles.loginButtonText}>로그인</Text>
+          </TouchableOpacity>
+
+          <View style={styles.signupContainer}>
+            <TouchableOpacity onPress={handleJoin}>
+              <Text style={styles.signupText}>회원가입</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
 
       <TouchableOpacity onPress={handleLogin} style={styles.kakaoButton}>
         <Image source={require('../../assets/images/kakao_login_large_wide.png')} style={styles.kakaoIcon} />
@@ -127,4 +190,17 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
   },
+  signupContainer: {
+    width: '100%',
+    alignItems: 'flex-end',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+
+  signupText: {
+    color: COLORS.orange,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
 });
