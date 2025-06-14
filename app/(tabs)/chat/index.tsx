@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderColor: COLORS.gray,
+    borderColor: COLORS.white,
   },
   avatar: {
     width: 48,
