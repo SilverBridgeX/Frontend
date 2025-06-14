@@ -38,7 +38,7 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
 
   useEffect(() => {
 
-    if (!roomId || !userId) return;
+    if (!roomId || !userId || !socket) return;
 
     socket.off('message', handleMessage); // 중복 방지
     socket.on('message', handleMessage);
