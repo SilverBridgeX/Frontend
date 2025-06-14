@@ -2,6 +2,7 @@
 import { loginWithKey } from '@/api/userService'; // 로그인 API 호출 함수
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { ROLE } from '@/constants/user';
+import { useKakaoLogin } from '@/hooks/useKakaoLogin'; // 카카오 로그인 훅
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,31 +10,32 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 export default function LoginScreen() {
   const [id, setId] = useState('');
   const [role, setRole] = useState(ROLE.OLDER); // 기본 역할을 '동행자'로 설정
-
-const handleLogin = async () => {
-  if (!id.trim()) {
-    alert('ID를 입력해주세요!');
-    return;
-  }
-
-  try {
-    const response = await loginWithKey(id.trim());
-
-    if (response.isSuccess) {
-      console.log('✅ 로그인 성공:', response.result);
-
-      // 예: 토큰 저장 (AsyncStorage 등으로)
-      // await AsyncStorage.setItem('accessToken', response.result.accessToken);
-
-      router.push('/home');
-    } else {
-      alert(`로그인 실패: ${response.message}`);
+  const { loginWithKakao, request } = useKakaoLogin();
+  
+  const handleLogin = async () => {
+    if (!id.trim()) {
+      alert('ID를 입력해주세요!');
+      return;
     }
-  } catch (error) {
-    console.error('로그인 에러:', error);
-    alert('로그인 중 오류가 발생했어요!');
-  }
-};
+
+    try {
+      const response = await loginWithKey(id.trim());
+
+      if (response.isSuccess) {
+        console.log('✅ 로그인 성공:', response.result);
+
+        // 예: 토큰 저장 (AsyncStorage 등으로)
+        // await AsyncStorage.setItem('accessToken', response.result.accessToken);
+
+        router.push('/home');
+      } else {
+        alert(`로그인 실패: ${response.message}`);
+      }
+    } catch (error) {
+      console.error('로그인 에러:', error);
+      alert('로그인 중 오류가 발생했어요!');
+    }
+  };
 
 
 const handleJoin = () => {
@@ -101,9 +103,15 @@ const handleJoin = () => {
         </>
       )}
 
-
-      <TouchableOpacity onPress={handleLogin} style={styles.kakaoButton}>
-        <Image source={require('../../assets/images/kakao_login_large_wide.png')} style={styles.kakaoIcon} />
+      <TouchableOpacity
+        onPress={loginWithKakao}
+        disabled={!request} // request가 준비되었을 때만 동작
+        style={styles.kakaoButton}
+      >
+        <Image
+          source={require('../../assets/images/kakao_login_large_wide.png')}
+          style={styles.kakaoIcon}
+        />
       </TouchableOpacity>
     </View>
   );
