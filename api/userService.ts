@@ -97,3 +97,36 @@ export const checkMatchingStatus = async (): Promise<boolean> => {
 };
 
 
+
+/** ✅ 결제 상태 확인 */
+export const getPaymentStatus = async () => {
+  try {
+    const res = await axiosUser.get('/payment/subscribe/status');
+    return res.data;
+  } catch (error) {
+    console.error('결제 상태 확인 실패:', error);
+    throw error;
+  }
+};
+
+/** ✅ 결제 URL 요청 */
+export const requestPaymentReady = async () => {
+  try {
+    const res = await axiosUser.post('/payment/ready');
+    return res.data;
+  } catch (error) {
+    console.error('결제 준비 요청 실패:', error);
+    throw error;
+  }
+};
+
+/** ✅ 결제 해지 */
+export const cancelSubscription = async () => {
+  try {
+    const res = await axiosUser.post('/payment/subscribe/cancel');
+    return res.data;
+  } catch (error) {
+    console.error('결제 해지 실패:', error);
+    throw error;
+  }
+};

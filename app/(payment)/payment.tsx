@@ -1,6 +1,10 @@
+import { cancelSubscription, getPaymentStatus, requestPaymentReady } from '@/api/userService';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator, Alert, Image, Linking,
+  StyleSheet, Text, TouchableOpacity, View
+} from 'react-native';
 
 export default function PaymentScreen() {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
@@ -9,92 +13,60 @@ export default function PaymentScreen() {
   const [paymentURL, setPaymentURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPaymentSubscribeCancel = async () => {
+  const fetchStatus = async () => {
     try {
-      const res = await fetch('http://15.165.17.95/user/payment/subscribe/cancel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyNTI1IiwiaWF0IjoxNzQ5OTg5NjQzLCJleHAiOjE3NTAwMDA0NDMsImF1dGhvcml0aWVzIjoiVVNFUiJ9.UajZITajJ4GLa2HOE1t_kamZfXASf8Wz_z_BZkrHRfn3p4atzNzLO_lMRTnFeKyevd-9KeRMR6ugCxJrk16d0Q`, // 여기 accessToken은 실제 토큰 변수
-        },
-      });
-      
-      console.log("cancel");
+      const data = await getPaymentStatus();
+      const status = data?.result?.status;
+      const approvedAt = data?.result?.last_approved_at;
+
+      const next = dayjs(approvedAt).add(30, 'day').format('YYYY년 M월 D일');
+      setNextDate(next);
+
+      if (approvedAt != null) {
+        setValidDate(dayjs(approvedAt).add(30, 'day') > dayjs());
+      }
+
+      if (status === 'ACTIVE') {
+        setIsPaid(true);
+      } else if (status === 'INACTIVE') {
+        setIsPaid(false);
+      } else {
+        setIsPaid(null);
+      }
+    } catch (error) {
+      Alert.alert('오류', '결제 정보를 불러오지 못했습니다.');
+      console.error(error);
+      setIsPaid(false);
+    } finally {
+      setLoading(false);
     }
-    catch (error) {
+  };
+
+  const fetchPayment = async () => {
+    try {
+      const data = await requestPaymentReady();
+      setPaymentURL(data?.result?.next_redirect_mobile_url);
+    } catch (error) {
+      Alert.alert('오류', '결제 URL을 불러오지 못했습니다.');
+      console.error(error);
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      await cancelSubscription();
+      Alert.alert('알림', '구독이 취소되었습니다.');
+      fetchStatus(); // 다시 상태 갱신
+    } catch (error) {
       Alert.alert('오류', '구독 취소에 실패했습니다.');
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    
-    const fetchPaymentReady = async () => {
-      try {
-        const res = await fetch('http://15.165.17.95/user/payment/ready', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyNTI1IiwiaWF0IjoxNzQ5OTg5NjQzLCJleHAiOjE3NTAwMDA0NDMsImF1dGhvcml0aWVzIjoiVVNFUiJ9.UajZITajJ4GLa2HOE1t_kamZfXASf8Wz_z_BZkrHRfn3p4atzNzLO_lMRTnFeKyevd-9KeRMR6ugCxJrk16d0Q`, // 여기 accessToken은 실제 토큰 변수
-          },
-        });
-
-        const data = await res.json();
-        
-        setPaymentURL(data?.result?.next_redirect_mobile_url);
-        console.log("payment" + paymentURL)
-      }
-      catch (error) {
-        Alert.alert('오류', '결제 URL를 불러오지 못했습니다.');
-        console.error(error);
-      }
-    }
-    const fetchPaymentStatus = async () => {
-      try {
-        const res = await fetch('http://15.165.17.95/user/payment/subscribe/status', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyNTI1IiwiaWF0IjoxNzQ5OTg5NjQzLCJleHAiOjE3NTAwMDA0NDMsImF1dGhvcml0aWVzIjoiVVNFUiJ9.UajZITajJ4GLa2HOE1t_kamZfXASf8Wz_z_BZkrHRfn3p4atzNzLO_lMRTnFeKyevd-9KeRMR6ugCxJrk16d0Q`, // 여기 accessToken은 실제 토큰 변수
-          },
-        });
-        const data = await res.json();
-
-        const status = data?.result?.status;
-        const approvedAt = data?.result?.last_approved_at;
-
-        const next = dayjs(approvedAt).add(30, 'day').format('YYYY년 M월 D일');
-        
-        setNextDate(next);
-
-        if (approvedAt != null) {
-          setValidDate(dayjs(approvedAt).add(30, 'day') > dayjs());
-        }
-
-        if (status === "ACTIVE") {
-          setIsPaid(true);
-        } else if (status == "INACTIVE") {
-          setIsPaid(false);
-        } else {
-          setIsPaid(null);
-        }
-
-        
-      } catch (error) {
-        Alert.alert('오류', '결제 정보를 불러오지 못했습니다.');
-        console.error(error);
-        setIsPaid(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPaymentReady();
-    fetchPaymentStatus();
-
+    fetchPayment();
+    fetchStatus();
   }, []);
-
-  
 
   if (loading) {
     return (
@@ -107,15 +79,10 @@ export default function PaymentScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>은빛동행 결제</Text>
-
       {isPaid === true && validDate === true && (
         <>
-          <Text style={styles.subHeader}>
-            다음 결제 예정일은 <Text style={{ fontWeight: 'bold' }}>{nextDate}</Text> 입니다.
-          </Text>
-
+          <Text style={styles.subHeader}>다음 결제 예정일은 <Text style={{ fontWeight: 'bold' }}>{nextDate}</Text> 입니다.</Text>
           <Text style={styles.sectionTitle}>회원님이 누리고 있는 혜택</Text>
-
           <View style={styles.benefitBox}>
             <View style={styles.benefitItem}>
               <Image source={require('@/assets/images/chat.png')} style={styles.icon} />
@@ -126,22 +93,16 @@ export default function PaymentScreen() {
               <Text style={styles.benefitText}>맞춤 사회 활동 추천</Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={fetchPaymentSubscribeCancel}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleCancel}>
             <Text style={styles.buttonText}>해지하기</Text>
           </TouchableOpacity>
         </>
       )}
-      {isPaid === false && validDate == true && (
+
+      {isPaid === false && validDate === true && (
         <>
-          <Text style={styles.subHeader}>
-            혜택이 <Text style={{ fontWeight: 'bold' }}>{nextDate}</Text>에 종료됩니다.
-          </Text>
-
+          <Text style={styles.subHeader}>혜택이 <Text style={{ fontWeight: 'bold' }}>{nextDate}</Text>에 종료됩니다.</Text>
           <Text style={styles.sectionTitle}>회원님이 누리고 있는 혜택</Text>
-
           <View style={styles.benefitBox}>
             <View style={styles.benefitItem}>
               <Image source={require('@/assets/images/chat.png')} style={styles.icon} />
@@ -154,6 +115,7 @@ export default function PaymentScreen() {
           </View>
         </>
       )}
+
       {((isPaid === null && validDate === null) || (isPaid === false && validDate === false)) && (
         <>
           <Text style={styles.subHeader}>당신의 이야기를 들어줄 친구, 지금 만나보세요.</Text>
@@ -174,14 +136,14 @@ export default function PaymentScreen() {
               <Text style={styles.featureDescription}>친구와 함께 무엇을 하면 좋을지 추천 받아요.</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.button}
-            onPress={() => {
-              if (paymentURL) {
-                Linking.openURL(paymentURL);
-              } else {
-                Alert.alert('오류', '결제 URL이 없습니다.');
-              }
-            }}>
+
+          <TouchableOpacity style={styles.button} onPress={() => {
+            if (paymentURL) {
+              Linking.openURL(paymentURL);
+            } else {
+              Alert.alert('오류', '결제 URL이 없습니다.');
+            }
+          }}>
             <Text style={styles.buttonText}>9,900원 결제하기</Text>
           </TouchableOpacity>
         </>
@@ -189,6 +151,7 @@ export default function PaymentScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
