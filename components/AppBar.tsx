@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray,
+    borderBottomColor: COLORS.white,
   },
   appBarTitle: {
     fontSize: FONT_SIZES.title,

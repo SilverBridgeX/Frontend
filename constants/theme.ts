@@ -5,7 +5,7 @@ export const COLORS = {
   lemon: '#FFE67F',
   lightLemon: '#FFF7D7',
   white: '#fff',
-  gray: '#80000000',
+  gray: '#C8C8C8',
   black: '#000000',
   background: '#000000'
 };

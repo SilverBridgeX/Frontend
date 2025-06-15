@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "SilverAccompany",
+    "owner": "clara0830",
     "slug": "SilverAccompany",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "silveraccompany",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
