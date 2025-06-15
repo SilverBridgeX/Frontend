@@ -2,7 +2,6 @@
 import { loginWithKey } from '@/api/userService'; // 로그인 API 호출 함수
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { ROLE } from '@/constants/user';
-import { useKakaoLogin } from '@/hooks/useKakaoLogin'; // 카카오 로그인 훅
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -10,7 +9,6 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 export default function LoginScreen() {
   const [id, setId] = useState('');
   const [role, setRole] = useState(ROLE.OLDER); // 기본 역할을 '동행자'로 설정
-  const { loginWithKakao, request } = useKakaoLogin();
   
   const handleLogin = async () => {
     if (!id.trim()) {
@@ -104,8 +102,7 @@ const handleJoin = () => {
       )}
 
       <TouchableOpacity
-        onPress={loginWithKakao}
-        disabled={!request} // request가 준비되었을 때만 동작
+        onPress={() => router.push('/login/kakao-login')}
         style={styles.kakaoButton}
       >
         <Image

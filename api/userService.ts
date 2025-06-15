@@ -78,3 +78,22 @@ export const reissueToken = async () => {
     throw error;
   }
 };
+
+// ✅ 매칭 상태 확인 API
+export const checkMatchingStatus = async (): Promise<boolean> => {
+  try {
+    const response = await axiosUser.post('/match/requests/results');
+    const data = response.data;
+
+    if (data.isSuccess && typeof data.result === 'boolean') {
+      return data.result;
+    } else {
+      throw new Error('Invalid response structure');
+    }
+  } catch (error) {
+    console.error('매칭 상태 확인 실패:', error);
+    throw error;
+  }
+};
+
+
