@@ -1,15 +1,12 @@
-// api/aiService.ts
+import axiosAI from '@/lib/axiosAI';
 import { AIRequestPayload, AIResponse } from '@/types/chat';
-import axios from 'axios';
-
-const BASE_URL = 'http://15.165.17.95/ai'; 
 
 export const sendToAI = async (payload: AIRequestPayload): Promise<AIResponse> => {
   try {
-    const res = await axios.post<AIResponse>(`${BASE_URL}/icebreaking/`, payload);
+    const res = await axiosAI.post<AIResponse>('/icebreaking/', payload);
     return res.data;
   } catch (error) {
-    console.error('AI 서버 전송 실패:', error);
+    console.error('❌ AI 서버 전송 실패:', error);
     return { state: 'continue', text: '' };
   }
 };
@@ -20,10 +17,10 @@ export const getSimulationMessage = async (
   roomId: string
 ): Promise<{ text: string }> => {
   try {
-    const res = await axios.post(`${BASE_URL}/simulation/message`, {
+    const res = await axiosAI.post('/simulation/message', {
       message_list: messageList,
       simulation_persona: simulationPersona,
-      room_id: roomId
+      room_id: roomId,
     });
     return res.data;
   } catch (error) {
@@ -38,7 +35,7 @@ export const createSimulationRoom = async (
   userGender: string
 ): Promise<{ room_id: string }> => {
   try {
-    const res = await axios.post(`${BASE_URL}/simulation/room`, {
+    const res = await axiosAI.post('/simulation/room', {
       user_id: userId,
       user_name: userName,
       user_gender: userGender,
@@ -55,11 +52,11 @@ export const getAssistantMessage = async (
   roomId: string
 ): Promise<{ message: string }> => {
   try {
-    const res = await axios.get(`${BASE_URL}/assistant`, {
+    const res = await axiosAI.get('/assistant', {
       params: {
         userId,
-        roomId
-      }
+        roomId,
+      },
     });
     return res.data;
   } catch (error) {
@@ -67,6 +64,3 @@ export const getAssistantMessage = async (
     return { message: '' };
   }
 };
-
-
-
