@@ -130,3 +130,16 @@ export const cancelSubscription = async () => {
     throw error;
   }
 };
+
+export const kakaoLoginWithCode = async (code: string) => {
+  try {
+    console.log('카카오 로그인 실패:', code);
+    const res = await axiosUser.get('/members/code/kakao', {
+      params: { code },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('카카오 로그인 실패:', error);
+    throw error;
+  }
+};

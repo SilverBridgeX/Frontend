@@ -20,7 +20,7 @@ export default function ChatList() {
   useEffect(() => {
     const loadRooms = async () => {
       try {
-        const rooms = await chatService.fetchChatRoomList(userId);
+        const rooms = await chatService.fetchChatRoomList();
         setChatRooms(rooms);
       } catch (error) {
         console.error('채팅방 목록 로딩 실패:', error);

@@ -35,13 +35,6 @@ export default function LoginScreen() {
     }
   };
 
-
-const handleJoin = () => {
-    // 로그인 로직 (예: ID 확인)
-    router.push({ pathname: '/login/join', params: { role } });
-
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>은빛 동행</Text>
@@ -93,16 +86,17 @@ const handleJoin = () => {
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
 
-          <View style={styles.signupContainer}>
-            <TouchableOpacity onPress={handleJoin}>
-              <Text style={styles.signupText}>회원가입</Text>
-            </TouchableOpacity>
-          </View>
         </>
       )}
 
       <TouchableOpacity
-        onPress={() => router.push('/login/kakao-login')}
+        onPress={() =>{
+          console.log('카카오 버튼 클릭됨')
+          router.push({
+            pathname: '/login/kakao-login',
+            params: { role }, // ← 선택된 역할 함께 넘김
+          })
+        }}
         style={styles.kakaoButton}
       >
         <Image
@@ -110,6 +104,7 @@ const handleJoin = () => {
           style={styles.kakaoIcon}
         />
       </TouchableOpacity>
+
     </View>
   );
 }

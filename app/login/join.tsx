@@ -1,41 +1,45 @@
 // screens/SignupScreen.tsx
 import { socialLogin } from '@/api/userService';
 import { COLORS } from '@/constants/theme';
-import { EMAIL, ROLE } from '@/constants/user';
+import { ROLE } from '@/constants/user';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SignupScreen() {
+  const { email: emailParam, role: roleParam } = useLocalSearchParams<{
+    email?: string;
+    role?: string;
+  }>();
+
+  const router = useRouter();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const initialRole = params.role === ROLE.OLDER_PROTECTER ? ROLE.OLDER_PROTECTER : ROLE.OLDER;
-  const [role, setRole] = useState(initialRole);
+  const [role, setRole] = useState(roleParam === ROLE.OLDER_PROTECTER ? ROLE.OLDER_PROTECTER : ROLE.OLDER);
 
   const handleComplete = async () => {
     try {
-        const response = await socialLogin({
+      if (!emailParam) {
+        alert('이메일 정보가 없습니다.');
+        return;
+      }
+
+      const response = await socialLogin({
         role,
-        email: EMAIL,
+        email: emailParam,
         nickname: name,
         streetAddress: address,
-        });
+      });
 
-        if (response.isSuccess) {
-        // ✅ 토큰 저장 로직 (선택)
+      if (response.isSuccess) {
         console.log('회원가입 성공! accessToken:', response.result.accessToken);
-        // 예: await AsyncStorage.setItem('accessToken', response.result.accessToken);
-
-        router.replace('/login'); // 회원가입 후 로그인 화면으로 이동
+        router.replace('/login');
         alert('회원가입 성공! 로그인 화면으로 이동합니다.');
-
-        } else {
-        alert('로그인 실패: ' + response.message);
-        }
+      } else {
+        alert('회원가입 실패: ' + response.message);
+      }
     } catch (error) {
-        alert('에러 발생: ' + error);
+      alert('에러 발생: ' + error);
     }
   };
 
@@ -62,6 +66,7 @@ export default function SignupScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useRef } from 'react';
 import { Dimensions, SafeAreaView } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -10,6 +10,8 @@ export default function KakaoLoginWebview() {
   const deviceWidth = Dimensions.get("window").width;
   const deviceHeight = Dimensions.get("window").height;
 
+  const isHandled = useRef(false);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <WebView
@@ -18,7 +20,9 @@ export default function KakaoLoginWebview() {
           uri: `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`,
         }}
         onNavigationStateChange={(e) => {
-          if (e.url.includes('code=')) {
+          if (!isHandled.current && e.url.includes('code=')) {
+            isHandled.current = true; // ✅ 한 번만 처리하도록 막기
+            console.log("✅ 카카오 로그인 인가코드 감지됨");
             const code = e.url.split('code=')[1];
             router.push({
               pathname: '/login/kakao-redirect',
