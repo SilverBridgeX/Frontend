@@ -2,7 +2,6 @@
 import { loginWithKey } from '@/api/userService'; // 로그인 API 호출 함수
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { ROLE } from '@/constants/user';
-import { useKakaoLogin } from '@/hooks/useKakaoLogin'; // 카카오 로그인 훅
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -10,7 +9,6 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 export default function LoginScreen() {
   const [id, setId] = useState('');
   const [role, setRole] = useState(ROLE.OLDER); // 기본 역할을 '동행자'로 설정
-  const { loginWithKakao, request } = useKakaoLogin();
   
   const handleLogin = async () => {
     if (!id.trim()) {
@@ -35,13 +33,6 @@ export default function LoginScreen() {
       console.error('로그인 에러:', error);
       alert('로그인 중 오류가 발생했어요!');
     }
-  };
-
-
-const handleJoin = () => {
-    // 로그인 로직 (예: ID 확인)
-    router.push({ pathname: '/login/join', params: { role } });
-
   };
 
   return (
@@ -95,17 +86,17 @@ const handleJoin = () => {
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
 
-          <View style={styles.signupContainer}>
-            <TouchableOpacity onPress={handleJoin}>
-              <Text style={styles.signupText}>회원가입</Text>
-            </TouchableOpacity>
-          </View>
         </>
       )}
 
       <TouchableOpacity
-        onPress={loginWithKakao}
-        disabled={!request} // request가 준비되었을 때만 동작
+        onPress={() =>{
+          console.log('카카오 버튼 클릭됨')
+          router.push({
+            pathname: '/login/kakao-login',
+            params: { role }, // ← 선택된 역할 함께 넘김
+          })
+        }}
         style={styles.kakaoButton}
       >
         <Image
@@ -113,6 +104,7 @@ const handleJoin = () => {
           style={styles.kakaoIcon}
         />
       </TouchableOpacity>
+
     </View>
   );
 }

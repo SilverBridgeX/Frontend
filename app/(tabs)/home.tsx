@@ -1,8 +1,9 @@
-import { createSimulationRoom } from '@/api/aiService'; // ✅ 연습방 API import
+import { createSimulationRoom } from '@/api/aiService';
+import { checkMatchingStatus, requestMatching } from '@/api/userService';
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
 import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const chatRooms = [
@@ -13,22 +14,104 @@ const chatRooms = [
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { userId, userName, userGender } = useChatStore();
 
-  const {
-    userId,
-    userName,
-    userGender
-  } = useChatStore();
+  const [countdown, setCountdown] = useState('');
+  const [buttonState, setButtonState] = useState<'idle' | 'waiting'>('waiting');
+
+  useEffect(() => {
+    checkMatchingStatus()
+      .then((res) => {
+        if (res === true) {
+          setButtonState('idle');
+          setCountdown('');
+        } else {
+          setButtonState('waiting');
+          startMatchingTimer();
+        }
+      })
+      .catch(() => {
+        Alert.alert('오류', '매칭 상태 확인에 실패했습니다.');
+        setButtonState('idle');
+        setCountdown('');
+      });
+  }, []);
 
   const handleCreateSimulationRoom = async () => {
     try {
       const response = await createSimulationRoom(Number(userId), userName, userGender);
       if (response.room_id) {
         Alert.alert('연습모드 생성 완료!', '새로운 연습방이 만들어졌어요 🎉');
-        // router.push(`/chat/${response.room_id}`); // 자동 입장 원하면 주석 해제
       }
     } catch (error) {
       Alert.alert('생성 실패', '연습방 생성에 실패했어요 😢');
+    }
+  };
+
+  const getNextTargetTime = (): Date => {
+    const now = new Date();
+    const currentMinutes = now.getMinutes();
+    const nextTargetMinute = [0, 20, 40].find(m => currentMinutes < m) ?? 60;
+
+    const target = new Date(now);
+    target.setMinutes(nextTargetMinute === 60 ? 0 : nextTargetMinute);
+    target.setSeconds(0);
+    target.setMilliseconds(0);
+    if (nextTargetMinute === 60) {
+      target.setHours(target.getHours() + 1);
+    }
+
+    return target;
+  };
+
+  const startMatchingTimer = () => {
+    const targetTime = getNextTargetTime();
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const remaining = targetTime.getTime() - now;
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+
+        checkMatchingStatus()
+          .then(res => {
+            if (res === true) {
+              setButtonState('idle');
+              setCountdown('');
+              Alert.alert('매칭 성공!', '만남 시작하기 버튼이 활성화되었습니다 😊');
+            } else {
+              startMatchingTimer();
+            }
+          })
+          .catch(() => {
+            Alert.alert('오류', '매칭 상태 확인 중 오류가 발생했습니다.');
+            setButtonState('idle');
+            setCountdown('');
+          });
+      } else {
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        setCountdown(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+      }
+    }, 1000);
+  };
+
+  const handleMatchStart = () => {
+    if (buttonState === 'idle') {
+      requestMatching()
+        .then(res => {
+          if (res?.isSuccess && res.result) {
+            Alert.alert('매칭 요청 성공', '매칭이 시작되었습니다 🎉');
+            setButtonState('waiting'); // 👉 상태를 waiting으로 변경
+            startMatchingTimer();      // 👉 타이머 시작
+          } else {
+            Alert.alert('매칭 요청 실패', '다시 시도해주세요.');
+          }
+        })
+        .catch(() => {
+          Alert.alert('오류', '매칭 요청 중 오류가 발생했습니다.');
+        });
     }
   };
 
@@ -39,19 +122,22 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity style={styles.startButton} onPress={() => router.push('/match')}>
-          <Text style={styles.startButtonText}>만남 시작하기</Text>
+        <TouchableOpacity
+          style={[styles.startButton, { backgroundColor: COLORS.lightLemon }]}
+          onPress={handleMatchStart}
+          disabled={buttonState !== 'idle'}
+        >
+          <Text style={styles.startButtonText}>
+            {buttonState === 'idle' ? '만남 시작하기' : `매칭까지 ${countdown}`}
+          </Text>
         </TouchableOpacity>
 
-      {/* 최근 채팅 제목 + 연습모드방 만들기 버튼 */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>최근 채팅</Text>
-
-        <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
-          <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
-        </TouchableOpacity>
-      </View>
-
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>최근 채팅</Text>
+          <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
+            <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
+          </TouchableOpacity>
+        </View>
 
         {chatRooms.map((room) => (
           <TouchableOpacity
@@ -72,7 +158,6 @@ export default function HomeScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -81,49 +166,43 @@ const styles = StyleSheet.create({
   appBar: {
     height: 60,
     backgroundColor: COLORS.white,
-    justifyContent: 'center',      // 수직 중앙 정렬
-    alignItems: 'flex-start',      // 왼쪽 정렬
-    paddingTop: 0,                 // 필요시 0 또는 원하는 값
-    paddingLeft: SPACING.lg,  
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: SPACING.lg,
   },
   appBarTitle: {
     fontSize: 21,
     fontWeight: 'bold',
     color: COLORS.orange,
-    // 그림자 효과 추가 (theme의 SHADOWS.text 사용)
     ...(SHADOWS.bubble),
   },
   content: {
     padding: SPACING.md,
   },
   startButton: {
-    backgroundColor: COLORS.lightLemon,
     paddingVertical: SPACING.xl,
     borderRadius: RADIUS.full,
     alignItems: 'center',
     marginBottom: SPACING.xl,
-    marginHorizontal: 30,         // 좌우 30씩 여백
-    alignSelf: 'stretch',         // 부모(View)의 가로를 기준으로 늘림
+    marginHorizontal: 30,
+    alignSelf: 'stretch',
     ...SHADOWS.bubble,
   },
   startButtonText: {
-    fontSize: FONT_SIZES.title + 4,   // 글씨 더 크게
+    fontSize: FONT_SIZES.title + 4,
     color: COLORS.black,
-    fontWeight: 'bold',               // 볼드 처리
+    fontWeight: 'bold',
   },
   sectionTitle: {
     fontSize: FONT_SIZES.title,
     fontWeight: 'bold',
-    // marginBottom 제거
-    marginTop: 0, // sectionHeader 내부에서 수직 정렬로 대체
-    lineHeight: FONT_SIZES.title + 4, // 세로 중앙에 텍스트 자연스럽게 정렬
+    marginTop: 0,
+    lineHeight: FONT_SIZES.title + 4,
   },
   chatRoom: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.md,
-    // borderBottomWidth: 1,           // 구분선 제거
-    // borderBottomColor: COLORS.black // 구분선 제거
   },
   avatar: {
     width: 48,
@@ -148,24 +227,23 @@ const styles = StyleSheet.create({
   },
   simulationButton: {
     backgroundColor: COLORS.orange,
-    paddingVertical: 8,        // 높이 키움
-    paddingHorizontal: 16,     // 너비 키움
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: RADIUS.large,
-    marginLeft: 'auto',        // 오른쪽 정렬
-    justifyContent: 'center',  // 버튼 안 텍스트 수직 가운데
+    marginLeft: 'auto',
+    justifyContent: 'center',
     ...SHADOWS.bubble,
   },
   simulationButtonText: {
-    fontSize: FONT_SIZES.small,  // 기존 xsmall → small로 키움
+    fontSize: FONT_SIZES.small,
     color: COLORS.white,
     fontWeight: 'bold',
   },
   sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',        // 텍스트와 버튼 모두 수직 정렬
+    alignItems: 'center',
     marginTop: SPACING.xl,
     marginBottom: SPACING.md,
     marginHorizontal: SPACING.md,
-  }
-
+  },
 });
