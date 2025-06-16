@@ -9,10 +9,18 @@ export default function Index() {
   const { setSocket, userId } = useChatStore();
 
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = getSocket(userId); // ✅ getSocket() 딱 한 번만 실행됨
-      setSocket(socketRef.current);
-    }
+    const connectSocket = async () => {
+      if (!socketRef.current) {
+        try {
+          const socket = await getSocket(userId); // ✅ 비동기 대기
+          socketRef.current = socket;
+          setSocket(socket);
+        } catch (error) {
+          console.error('❌ 소켓 연결 실패:', error);
+        }
+      }
+    };
+    connectSocket();
   }, []);
 
   return <Redirect href="/login" />;
