@@ -11,6 +11,7 @@ const axiosUser = axios.create({
 axiosUser.interceptors.request.use(
   async (config) => {
     const accessToken = await getAccessToken();
+    console.log(accessToken)
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
