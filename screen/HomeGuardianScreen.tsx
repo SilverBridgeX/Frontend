@@ -16,6 +16,7 @@ export default function HomeGuardianScreen() {
   const router = useRouter();
   const { setIsRegisteringByGuardian } = useChatStore();
   const [olderList, setOlderList] = useState<{ nickname: string; key: string }[]>([]);
+  const { setKey } = useChatStore();
 
     // ✅ 보호자 마이페이지 데이터 불러오기
   useEffect(() => {
@@ -68,12 +69,17 @@ export default function HomeGuardianScreen() {
                 <Text style={styles.nickname}>{older.nickname}</Text>
                 <Text style={styles.key}>{older.key}</Text>
               </View>
+
               <TouchableOpacity
                 style={styles.payButton}
-                
+                  onPress={() => {
+                    setKey(older.key);        // ✅ 선택한 동행자 key 저장
+                    router.push('/payment');       // ✅ 결제 화면으로 이동
+                  }}              
               >
                 <Text style={styles.payButtonText}>결제하기</Text>
               </TouchableOpacity>
+
             </View>
           ))}
         </ScrollView>

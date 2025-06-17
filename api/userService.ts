@@ -16,7 +16,7 @@ export const requestMatching = async () => {
   }
 };
 
-// ✅ 소셜 로그인 API
+// ✅ 로그인 API
 export const socialLogin = async ({
   role,
   email,
@@ -53,6 +53,33 @@ export const socialLogin = async ({
   }
 };
 
+// ✅ 소셜 로그인 API
+export const socialShortLogin = async ({
+  role,
+  email,
+}: {
+  role: typeof ROLE[keyof typeof ROLE];
+  email: string;
+}) => {
+  try {
+    const response = await axiosUser.post(`${BASE_URL}/members/social/login`, {
+      role,
+      email,
+    });
+
+    const { accessToken, refreshToken } = response.data.result;
+
+    // ✅ 토큰 저장
+    await setTokens(accessToken, refreshToken);
+
+    return response.data;
+  } catch (error) {
+    console.error('소셜 로그인 실패:', error);
+    throw error;
+  }
+};
+
+
 // ✅ 키 기반 로그인 API
 export const loginWithKey = async (key: string) => {
   try {
@@ -75,14 +102,19 @@ export const loginWithKey = async (key: string) => {
 // ✅ 토큰 재발급 API
 export const reissueToken = async () => {
   try {
-    const refreshToken = await getRefreshToken();
+    const before_refreshToken = await getRefreshToken();
     //console.log('리프레시 토큰큰', error);
 
     const response = await axios.post(`${BASE_URL}/members/reissue`, null, {
       headers: {
-        Authorization: `Bearer ${refreshToken}`,
+        Authorization: `Bearer ${before_refreshToken}`,
       },
     });
+
+    const { accessToken, refreshToken } = response.data.result;
+
+    // ✅ AsyncStorage에 토큰 저장
+    await setTokens(accessToken, refreshToken);
 
     return response.data;
   } catch (error) {
@@ -146,12 +178,13 @@ export const requestPaymentReady = async () => {
 
 export const requestPaymentReadyWithKey = async ({ id }: { id: string }) => {
   try {
+    console.log(id);
     const res = await axiosUser.post('/payment/ready/key', {
       params: { id },
     });
     return res.data;
   } catch (error) {
-    console.error('결제 준비 요청 실패:', error);
+    console.error('보호자 결제 준비 요청 실패:', error);
     throw error;
   }
 };

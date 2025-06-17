@@ -12,7 +12,7 @@ export default function SignupScreen() {
     email?: string;
   }>();
 
-  const { userRole, isRegisteringByGuardian, setIsRegisteringByGuardian } = useChatStore();
+  const { userRole, isRegisteringByGuardian, setIsRegisteringByGuardian} = useChatStore();
   const router = useRouter();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');

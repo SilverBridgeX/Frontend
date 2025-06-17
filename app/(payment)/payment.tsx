@@ -1,11 +1,12 @@
 import { cancelSubscription, cancelSubscriptionWithKey, getPaymentStatus, getPaymentStatusWithKey, requestPaymentReady, requestPaymentReadyWithKey } from '@/api/userService';
+import { ROLE } from '@/constants/user';
+import { useChatStore } from '@/store/chatStore';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking,
   StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
-import { useChatStore } from '@/store/chatStore';
 
 export default function PaymentScreen() {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
@@ -18,7 +19,7 @@ export default function PaymentScreen() {
   const fetchStatus = async () => {
     try {
       let data;
-      if (userRole === 'OLDER') {
+      if (userRole === ROLE.OLDER) {
         data = await getPaymentStatus();
       } else {
         data = await getPaymentStatusWithKey({ id: key });
@@ -52,10 +53,12 @@ export default function PaymentScreen() {
   const fetchPayment = async () => {
     try {
       let data;
-      if (userRole === 'OLDER') {
+      if (userRole === ROLE.OLDER) {
         data = await requestPaymentReady();
+        console.log("older")
       } else {
         data = await requestPaymentReadyWithKey({ id: key });
+        console.log("guardian")
       }
       setPaymentURL(data?.result?.next_redirect_mobile_url);
     } catch (error) {
@@ -66,7 +69,7 @@ export default function PaymentScreen() {
 
   const handleCancel = async () => {
     try {
-      if (userRole === 'OLDER') {
+      if (userRole === ROLE.OLDER) {
         await cancelSubscription();
       } else {
         await cancelSubscriptionWithKey({ id: key });

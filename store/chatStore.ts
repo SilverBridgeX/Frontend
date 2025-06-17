@@ -28,6 +28,7 @@ interface ChatState {
   setSimulationPersona: (persona: any) => void;
   setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => void;
   setIsRegisteringByGuardian: (val: boolean) => void;
+  setKey: (key: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -88,5 +89,7 @@ export const useChatStore = create<ChatState>((set) => ({
   setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => set({ userRole: role }),
 
   setIsRegisteringByGuardian: (val: boolean) => set({ isRegisteringByGuardian: val }),
+
+  setKey: (key) => set({ key: key }),
 
 }));

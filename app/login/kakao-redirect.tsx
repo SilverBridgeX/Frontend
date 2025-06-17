@@ -1,16 +1,20 @@
 // ✅ app/kakao/KakaoLoginRedirect.tsx
-import { kakaoLoginWithCode } from '@/api/userService';
+import { kakaoLoginWithCode, socialShortLogin } from '@/api/userService';
 import { goToHomeAndConnectSocket } from '@/lib/goToHomeAndConnectSocket';
+import { useChatStore } from '@/store/chatStore';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, SafeAreaView } from 'react-native';
 
 export default function KakaoLoginRedirect() {
   const { token} = useLocalSearchParams();
+  const {userRole} = useChatStore()
 
   useEffect(() => {
     const handleKakaoLogin = async () => {
+
       try {
+
         console.log('🔑 전달받은 인가 코드:', token);
         const response = await kakaoLoginWithCode(token as string);
 
@@ -24,9 +28,25 @@ export default function KakaoLoginRedirect() {
             params: { email}, // 회원가입은 여전히 role 필요
           });
         } else {
-          router.replace('/home');
-          await goToHomeAndConnectSocket(); 
+
+          let response = await socialShortLogin({
+            role: userRole,
+            email: email,
+          });
+
+          if (response.isSuccess) {
+            console.log('로그인 성공! accessToken:', response.result.accessToken);
+            await goToHomeAndConnectSocket();
+            router.replace('/home');
+
+            alert('로그인 성공! 홈 화면으로 이동합니다.');
+          } else {
+            router.replace('/login');
+            alert('로그인 실패: ' + response.message);
+          }    
+
         }
+
       } catch (err) {
         console.error('카카오 로그인 실패:', err);
       }
