@@ -136,17 +136,27 @@ export default function ChatInput({
               }}
               showsVerticalScrollIndicator
               renderItem={({ item }) => (
-                <View style={[styles.card, styles.shadowCard]}>
-                  <View style={styles.cardTopRow}>
-                    <Image
-                      source={categoryToImage[item.category] ?? ActivityIcon}
-                      style={styles.cardImage}
-                    />
-                    <Text style={styles.cardTitle}>{item.name}</Text>
+                <Pressable
+                  onPress={() => {
+                    const message = `[${item.category}] ${item.name}\n장소: ${item.location}\n시간: ${item.time}`;
+                    onSendMessage(message);
+                    setShowSuggestions(false); // 모달 닫기
+                    scrollToEnd(); // 스크롤 아래로
+                  }}
+                >
+                  <View style={[styles.card, styles.shadowCard]}>
+                    <View style={styles.cardTopRow}>
+                      <Image
+                        source={categoryToImage[item.category] ?? ActivityIcon}
+                        style={styles.cardImage}
+                      />
+                      <Text style={styles.cardTitle}>{item.name}</Text>
+                    </View>
+                    <Text style={styles.cardLocation}>{item.location}</Text>
+                    <Text style={styles.cardTime}>{item.time}</Text>
                   </View>
-                  <Text style={styles.cardLocation}>{item.location}</Text>
-                  <Text style={styles.cardTime}>{item.time}</Text>
-                </View>
+                </Pressable>
+
               )}
             />
           </View>
