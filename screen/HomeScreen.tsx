@@ -51,7 +51,7 @@ export default function HomeScreen() {
   const getNextTargetTime = (): Date => {
     const now = new Date();
     const currentMinutes = now.getMinutes();
-    const nextTargetMinute = [0, 20, 40].find(m => currentMinutes < m) ?? 60;
+    const nextTargetMinute = [0, 10, 20, 30, 40, 50].find(m => currentMinutes < m) ?? 60;
 
     const target = new Date(now);
     target.setMinutes(nextTargetMinute === 60 ? 0 : nextTargetMinute);
