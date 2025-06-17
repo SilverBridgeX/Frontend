@@ -135,57 +135,55 @@ export default function HomeScreen() {
         <Text style={styles.appBarTitle}>은빛 동행</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity
-          style={[styles.startButton, { backgroundColor: COLORS.lightLemon }]}
-          onPress={handleMatchStart}
-          disabled={buttonState !== 'idle'}
-        >
-          <Text style={styles.startButtonText}>
-            {buttonState === 'idle' ? '만남 시작하기' : `매칭까지 ${countdown}`}
-          </Text>
+      <TouchableOpacity
+        style={[styles.startButton, { backgroundColor: COLORS.lightLemon }]}
+        onPress={handleMatchStart}
+        disabled={buttonState !== 'idle'}
+      >
+        <Text style={styles.startButtonText}>
+          {buttonState === 'idle' ? '만남 시작하기' : `매칭까지 ${countdown}`}
+        </Text>
+      </TouchableOpacity>
+
+      {/* <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>최근 채팅</Text>
+        <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
+          <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
         </TouchableOpacity>
+      </View> */}
 
-        {/* <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>최근 채팅</Text>
-          <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
-            <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
-          </TouchableOpacity>
-        </View> */}
-
-        <FlatList
-          data={chatRooms}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => {
-            const latest = item.latestMessage;
-            const participant = item.participants?.[0]?.name ?? '알 수 없음';
-            return (
-              <TouchableOpacity
-                style={styles.row}
-                onPress={() => {
-                  setStepNum(item.stepNum);
-                  router.push({
-                    pathname: '/chat/[roomId]',
-                    params: {
-                      roomId: item._id,
-                      isSimulation: item.isSimulation?.toString(), // boolean → string 변환 필요
-                    },
-                  })
-                }}
-              >
-                <Image source={{ uri: 'https://i.pravatar.cc/100?u=' + item._id }} style={styles.avatar2} />
-                <View style={styles.info}>
-                  <Text style={styles.name}>{participant}</Text>
-                  <Text style={styles.message} numberOfLines={1}>{latest?.content ?? '메시지 없음'}</Text>
-                </View>
-                <Text style={styles.time}>
-                  {latest?.createdAt ? new Date(latest.createdAt).toLocaleDateString() : ''}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </ScrollView>
+      <FlatList
+        data={chatRooms}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => {
+          const latest = item.latestMessage;
+          const participant = item.participants?.[0]?.name ?? '알 수 없음';
+          return (
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => {
+                setStepNum(item.stepNum);
+                router.push({
+                  pathname: '/chat/[roomId]',
+                  params: {
+                    roomId: item._id,
+                    isSimulation: item.isSimulation?.toString(), // boolean → string 변환 필요
+                  },
+                })
+              }}
+            >
+              <Image source={{ uri: 'https://i.pravatar.cc/100?u=' + item._id }} style={styles.avatar2} />
+              <View style={styles.info}>
+                <Text style={styles.name}>{participant}</Text>
+                <Text style={styles.message} numberOfLines={1}>{latest?.content ?? '메시지 없음'}</Text>
+              </View>
+              <Text style={styles.time}>
+                {latest?.createdAt ? new Date(latest.createdAt).toLocaleDateString() : ''}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
     </View>
   );
 }
