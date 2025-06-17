@@ -2,18 +2,19 @@ import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/
 import { Message, Sender } from '@/types/chat';
 import React, { useEffect, useState } from 'react';
 import {
+  FlatList,
   Image,
+  Modal,
   Pressable,
   StyleSheet,
+  Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-//import useVoiceInput from '../../hooks/useVoiceInput';
 
 const Send = require('../../assets/images/btn_send.png');
-//const MicIcon = require('../../assets/images/img_mike.png');
-//const PlayIcon = require('../../assets/images/icon_play.png');
-//const ActivityIcon = require('../../assets/images/icon_activity.png');
+const ActivityIcon = require('../../assets/images/icon_activity.png');
 
 const SENSITIVE_PATTERNS = [
   { type: '휴대폰 번호', regex: /01[016789]-?\d{3,4}-?\d{4}/ },
@@ -27,6 +28,7 @@ const categoryToImage: Record<string, any> = {
   산책: require('../../assets/images/activity_walk.png'),
   축제: require('../../assets/images/activity_festival.png'),
 };
+
 
 interface Props {
   onSendMessage: (content: string) => void;
@@ -53,7 +55,7 @@ export default function ChatInput({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasPrefilled, setHasPrefilled] = useState(false); 
 
-  //const [text, setText] = useState('');
+  const [text, setText] = useState('');
 
   useEffect(() => {
     if (prefillMessage && !hasPrefilled) {
@@ -64,14 +66,6 @@ export default function ChatInput({
   }, [prefillMessage, hasPrefilled]);
 
 
-  /* const {
-    isRecording,
-    startRecording,
-    stopRecording,
-    playLastRecording,
-    lastRecordingUri,
-  } = useVoiceInput(setMessages, roomId, sender); */
-
 const send = () => {
   if (!input.trim()) return;
   onSendMessage(input);
@@ -79,11 +73,6 @@ const send = () => {
   setHasPrefilled(false); 
   scrollToEnd();
 };
-
-
-  /* const handleVoiceButton = () => {
-    isRecording ? stopRecording() : startRecording();
-  }; */
 
   const detectSensitiveInfo = (text: string) => {
     for (const pattern of SENSITIVE_PATTERNS) {
@@ -94,7 +83,7 @@ const send = () => {
     }
   };
 
-  /* const activitySuggestions = [
+  const activitySuggestions = [
     {
       id: '1',
       name: '2024년 낙동강정원 벚꽃축제',
@@ -116,12 +105,11 @@ const send = () => {
       time: '내일 오전 10시',
       category: '축제',
     },
-  ];*/
+  ];
 
   return (
     <>
-      {/* 활동 추천 모달 제거 */}
-      {/* <Modal
+      <Modal
         transparent
         visible={showSuggestions}
         animationType="slide"
@@ -150,13 +138,12 @@ const send = () => {
             />
           </View>
         </View>
-      </Modal> */}
+      </Modal> 
 
       <View style={[styles.inputRow, styles.shadowInput]}>
-        {/* 활동 제안 버튼 제거 */}
-        {/* <Pressable onPress={() => setShowSuggestions(true)}>
+        <Pressable onPress={() => setShowSuggestions(true)}>
           <Image source={ActivityIcon} style={styles.sendIcon} />
-        </Pressable> */}
+        </Pressable> 
 
         <TextInput
           style={styles.input}
@@ -169,21 +156,6 @@ const send = () => {
           placeholderTextColor="#666666"
           onFocus={scrollToEnd}
         />
-
-        {/* 녹음 파일 재생 버튼 제거 */}
-        {/* {lastRecordingUri && !isRecording && (
-          <Pressable onPress={playLastRecording} style={styles.playButton}>
-            <Image source={PlayIcon} style={styles.playIcon} />
-          </Pressable>
-        )} */}
-
-        {/* 녹음 중 표시 UI 제거 */}
-        {/* {isRecording ? (
-          <Pressable onPress={handleVoiceButton} style={styles.recordingUI}>
-            <ActivityIndicator color={COLORS.orange} />
-            <Text style={styles.recordingText}>녹음 중...</Text>
-          </Pressable>
-        ) : ( */}
           <Pressable onPress={send}>
             <Image source={Send} style={styles.sendIcon} />
           </Pressable>

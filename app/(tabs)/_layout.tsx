@@ -12,19 +12,19 @@ export default function TabLayout() {
 
   return (
     <Tabs
-    screenOptions={{
-      tabBarActiveTintColor: COLORS.black,
-      headerShown: false,
-      tabBarButton: HapticTab,
-      tabBarStyle: Platform.select({
-        ios: {
-          backgroundColor: COLORS.white,
-        }, 
-        default: {
-          backgroundColor: COLORS.white,
-        },
-        
-      }),
+      screenOptions={{
+        tabBarActiveTintColor: COLORS.black,
+        headerShown: false,
+        tabBarButton: HapticTab,
+        tabBarStyle: Platform.select({
+          ios: {
+            backgroundColor: COLORS.white,
+          }, 
+          default: {
+            backgroundColor: COLORS.white,
+          },
+          
+        }),
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
@@ -32,40 +32,43 @@ export default function TabLayout() {
 
   }}
 > 
-  <Tabs.Screen
-    name="home"
-    options={{
-      title: '홈',
-      tabBarIcon: ({ focused }) =>  (
-        <Image
-              source={HomeIcon}
-              resizeMode="contain"
-              style={{
-                width: 24,
-                height: 24,
-                opacity: focused ? 1 : 0.6,
-              }} 
-          />
-        ),
-    }}
-  /> 
-  <Tabs.Screen
-    name="chat"
-    options={{
-      title: '채팅',
-      tabBarIcon: ({ focused }) =>  (
-        <Image
-              source={ChatIcon}
-              resizeMode="contain"
-              style={{
-                width: 34,
-                height: 34,
-                opacity: focused ? 1 : 0.6,
-              }} 
-          />
-        ),
-    }}
-  />
+
+    <Tabs.Screen
+      name="home"
+      options={{
+        title: '홈',
+        tabBarIcon: ({ focused }) =>  (
+          <Image
+                source={HomeIcon}
+                resizeMode="contain"
+                style={{
+                  width: 24,
+                  height: 24,
+                  opacity: focused ? 1 : 0.6,
+                }} 
+            />
+          ),
+      }}
+    /> 
+
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: '채팅',
+          tabBarIcon: ({ focused }) =>  (
+            <Image
+                  source={ChatIcon}
+                  resizeMode="contain"
+                  style={{
+                    width: 34,
+                    height: 34,
+                    opacity: focused ? 1 : 0.6,
+                  }} 
+              />
+            ),
+        }}
+      />
+ 
   <Tabs.Screen
     name="mypage"
     options={{

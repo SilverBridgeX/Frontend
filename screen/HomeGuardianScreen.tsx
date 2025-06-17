@@ -67,7 +67,7 @@ export default function HomeGuardianScreen() {
               />
               <View style={styles.olderInfo}>
                 <Text style={styles.nickname}>{older.nickname}</Text>
-                <Text style={styles.key}>{older.key}</Text>
+                <Text style={styles.key}>{"KEY : "+older.key}</Text>
               </View>
 
               <TouchableOpacity
@@ -145,15 +145,17 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   olderInfo: {
-    flex: 1,
+    flex: 1
   },
   nickname: {
-    fontSize: FONT_SIZES.small,
+    fontSize: FONT_SIZES.body,
     fontWeight: 'bold',
+    padding: 5,
   },
   key: {
-    fontSize: FONT_SIZES.small,
-    color: "#666666",
+    fontSize: FONT_SIZES.body,
+    color: COLORS.gray,
+    padding: 5,
   },
   payButton: {
     backgroundColor: COLORS.orange,
@@ -165,5 +167,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: FONT_SIZES.small,
+    padding: 5
   },
 });
