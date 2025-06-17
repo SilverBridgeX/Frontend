@@ -12,7 +12,7 @@ export default function Index() {
     const connectSocket = async () => {
       if (!socketRef.current) {
         try {
-          const socket = await getSocket(userId); // ✅ 비동기 대기
+          const socket = await getSocket(); // ✅ 비동기 대기
           socketRef.current = socket;
           setSocket(socket);
         } catch (error) {

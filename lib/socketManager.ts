@@ -5,7 +5,7 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket | null = null;
 
 
-export const getSocket = async (userId: string): Promise<Socket> => {
+export const getSocket = async (): Promise<Socket> => {
 
   if (!socket) {
     const accessToken = await AsyncStorage.getItem('accessToken');
