@@ -17,7 +17,7 @@ export default function KakaoLoginWebview() {
       <WebView
         style={{ width: deviceWidth, height: deviceHeight }}
         source={{
-          uri: `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`,
+          uri: `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code&prompt=login`,
         }}
         onNavigationStateChange={(e) => {
           if (!isHandled.current && e.url.includes('code=')) {

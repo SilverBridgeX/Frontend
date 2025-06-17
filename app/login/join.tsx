@@ -33,9 +33,13 @@ export default function SignupScreen() {
 
       if (response.isSuccess) {
         console.log('회원가입 성공! accessToken:', response.result.accessToken);
-        router.replace('/login');
-        alert('회원가입 성공! 로그인 화면으로 이동합니다.');
+        router.replace({
+          pathname: '/home',
+          params: { role },
+        });
+        alert('회원가입 성공! 홈 화면으로 이동합니다.');
       } else {
+        router.replace('/login');
         alert('회원가입 실패: ' + response.message);
       }
     } catch (error) {
