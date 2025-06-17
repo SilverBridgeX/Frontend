@@ -166,6 +166,7 @@ const send = () => {
             detectSensitiveInfo(text);
           }}
           placeholder="메시지를 입력하세요"
+          placeholderTextColor="#666666"
           onFocus={scrollToEnd}
         />
 

@@ -1,6 +1,7 @@
 import { ROLE } from '@/constants/user';
 import axiosUser from '@/lib/axiosUser';
 import { getRefreshToken, setTokens } from '@/lib/tokenStorage';
+import { getAccessToken } from '@/lib/tokenStorage';
 import axios from 'axios';
 
 const BASE_URL = 'http://15.165.17.95/user';
@@ -228,15 +229,20 @@ export const kakaoLoginWithCode = async (code: string) => {
 
 //보호자 api
 export const registerOlderByGuardian = async ({
+  role,
   email,
   nickname,
   streetAddress,
 }: {
+  role: string
   email: string;
   nickname: string;
   streetAddress: string;
 }) => {
   try {
+    const token = await getAccessToken();
+    console.log('🔐 [registerOlderByGuardian] accessToken:', token);
+
     const res = await axiosUser.post('/members/guardians/olders', {
       role: 'OLDER',
       email,

@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   key: {
     fontSize: FONT_SIZES.small,
-    color: COLORS.gray,
+    color: "#666666",
   },
   payButton: {
     backgroundColor: COLORS.orange,

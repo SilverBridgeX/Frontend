@@ -15,7 +15,7 @@ const chatRooms = [
 export default function ChatList() {
   const router = useRouter();
   const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const { userId } = useChatStore();
+  const { setStepNum } = useChatStore();
 
   useEffect(() => {
     const loadRooms = async () => {
@@ -41,7 +41,8 @@ export default function ChatList() {
           return (
             <TouchableOpacity
               style={styles.row}
-              onPress={() =>
+              onPress={() => {
+                setStepNum(item.stepNum);
                 router.push({
                   pathname: '/chat/[roomId]',
                   params: {
@@ -49,7 +50,7 @@ export default function ChatList() {
                     isSimulation: item.isSimulation?.toString(), // boolean → string 변환 필요
                   },
                 })
-              }
+              }}
             >
               <Image source={{ uri: 'https://i.pravatar.cc/100?u=' + item._id }} style={styles.avatar} />
               <View style={styles.info}>
