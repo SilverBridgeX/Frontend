@@ -13,6 +13,7 @@ interface ChatState {
   simulationPersona: any;
   userName:string;
   userGender:string;
+  email:string;
   userRole: typeof ROLE[keyof typeof ROLE];
   isRegisteringByGuardian: boolean;
   key:string;
@@ -29,12 +30,15 @@ interface ChatState {
   setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => void;
   setIsRegisteringByGuardian: (val: boolean) => void;
   setKey: (key: string) => void;
+  setUserName: (userName: string) => void;
+  setEmail: (email: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
   userId: '2525', // 예시로 고정된 userId, 실제로는 로그인 정보 등에서 가져와야 함
   userName:'상신',
   userGender:'여성',
+  email:'',
   socketList: [],
   recentTopicList: [],
   iceBreakingAIList: [],
@@ -91,5 +95,9 @@ export const useChatStore = create<ChatState>((set) => ({
   setIsRegisteringByGuardian: (val: boolean) => set({ isRegisteringByGuardian: val }),
 
   setKey: (key) => set({ key: key }),
+
+  setUserName: (userName) => set({ userName: userName }),
+
+  setEmail: (email) => set({ email: email }),
 
 }));

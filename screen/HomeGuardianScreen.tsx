@@ -73,7 +73,6 @@ export default function HomeGuardianScreen() {
               <TouchableOpacity
                 style={styles.payButton}
                   onPress={() => {
-                    console.log("setkekekek" + older.key);
                     setKey(older.key);        // ✅ 선택한 동행자 key 저장
                     router.push('/payment');       // ✅ 결제 화면으로 이동
                   }}              

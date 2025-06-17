@@ -12,17 +12,24 @@ export default function SignupScreen() {
     address?: string;
   }>();
 
-  const { userRole, isRegisteringByGuardian, setIsRegisteringByGuardian} = useChatStore();
+  const { userRole, userName, email, isRegisteringByGuardian, setUserName, setEmail, setIsRegisteringByGuardian } = useChatStore();
   const router = useRouter();
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [joinEmail, setJoinEmail] = useState('');
+
+  useEffect(() => {
+    if (emailParam) setJoinEmail(emailParam);
+  }, [])
 
   // ✅ 주소 파라미터가 들어오면 자동 입력
   useEffect(() => {
     console.log('🪝 addressParam from route:', addressParam); // 여기가 문제
     if (addressParam) {
       setAddress(addressParam as string);
+      setName(userName as string);
+      setJoinEmail(email);
     }
 
     return () => {
@@ -51,13 +58,13 @@ export default function SignupScreen() {
           alert('동행자 등록 실패: ' + response.message);
         }
       } else {
-        if (!emailParam) {
+        if (!joinEmail) {
           alert('이메일 정보가 없습니다.');
           return;
         }
         response = await socialLogin({
           role: userRole,
-          email: emailParam,
+          email: joinEmail,
           nickname: name,
           streetAddress: address,
         });
@@ -83,6 +90,7 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="닉네임을 입력해주세요"
+        placeholderTextColor="#666666"
         value={name}
         onChangeText={setName}
       />
@@ -91,18 +99,21 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="주소를 선택해주세요"
+        placeholderTextColor="#666666"
         value={address}
         onChangeText={setAddress}
       />
 
       <TouchableOpacity
         style={styles.searchButton}
-        onPress={() =>
+        onPress={() => {
+          setUserName(name);
+          setEmail(joinEmail);
           router.push({
             pathname: '/address',
             params: { callback: 'login/join' },
           } as any)
-        }
+        }}
       >
         <Text style={styles.searchButtonText}>주소 검색하기</Text>
       </TouchableOpacity>
