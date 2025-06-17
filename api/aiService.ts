@@ -54,7 +54,6 @@ export const getAssistantMessage = async (
   try {
     const res = await axiosAI.get('/assistant', {
       params: {
-        userId,
         roomId,
       },
     });
