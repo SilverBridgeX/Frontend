@@ -178,11 +178,15 @@ export const requestPaymentReady = async () => {
 };
 
 export const requestPaymentReadyWithKey = async ({ id }: { id: string }) => {
+  console.log(id);
   try {
-    console.log(id);
-    const res = await axiosUser.post('/payment/ready/key', {
-      params: { id },
-    });
+    
+    const res = await axiosUser.post('/payment/ready/key', 
+      {}, // POST body (비워둠)
+      {
+        params: { id }, // 쿼리 스트링
+      }
+    );
     return res.data;
   } catch (error) {
     console.error('보호자 결제 준비 요청 실패:', error);
@@ -203,9 +207,12 @@ export const cancelSubscription = async () => {
 
 export const cancelSubscriptionWithKey = async ({ id }: { id: string }) => {
   try {
-    const res = await axiosUser.post('/payment/subscribe/cancel/key', {
-      params: { id },
-    });
+    const res = await axiosUser.post('/payment/subscribe/cancel/key', 
+      {}, // POST body (비워둠)
+      {
+        params: { id }, // 쿼리 스트링
+      }
+    );
     return res.data;
   } catch (error) {
     console.error('결제 해지 실패:', error);
