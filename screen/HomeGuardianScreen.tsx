@@ -167,6 +167,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: FONT_SIZES.small,
-    padding: 5
+    padding: 10
   },
 });

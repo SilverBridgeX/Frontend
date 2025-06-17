@@ -1,5 +1,7 @@
 import { HapticTab } from '@/components/HapticTab';
 import { COLORS } from '@/constants/theme';
+import { ROLE } from '@/constants/user';
+import { useChatStore } from '@/store/chatStore';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Image, Platform } from 'react-native';
@@ -9,7 +11,7 @@ const ChatIcon = require('@/assets/images/tab_chat.png');
 const MyIcon = require('@/assets/images/tab_my.png');
 
 export default function TabLayout() {
-
+  const { userRole } = useChatStore();
   return (
     <Tabs
       screenOptions={{
@@ -37,6 +39,7 @@ export default function TabLayout() {
       name="home"
       options={{
         title: '홈',
+        tabBarButton: userRole === ROLE.OLDER_PROTECTER ? () => null : undefined, 
         tabBarIcon: ({ focused }) =>  (
           <Image
                 source={HomeIcon}
@@ -55,6 +58,7 @@ export default function TabLayout() {
         name="chat"
         options={{
           title: '채팅',
+          tabBarButton: userRole === ROLE.OLDER_PROTECTER ? () => null : undefined, 
           tabBarIcon: ({ focused }) =>  (
             <Image
                   source={ChatIcon}
@@ -73,6 +77,7 @@ export default function TabLayout() {
     name="mypage"
     options={{
       title: '마이',
+      tabBarButton: userRole === ROLE.OLDER_PROTECTER ? () => null : undefined, 
       tabBarIcon: ({ focused }) =>  (
         <Image
               source={MyIcon}
