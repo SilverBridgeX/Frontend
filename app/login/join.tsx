@@ -95,15 +95,6 @@ export default function SignupScreen() {
         onChangeText={setAddress}
       />
 
-      {/* ✅ 주소 검색하기 버튼 */}
-      <Text style={styles.label}>도로명 주소</Text>
-
-      {address ? (
-        <Text style={styles.addressText}>{address}</Text> // 주소 보여주기만 함
-      ) : (
-        <Text style={{ color: '#888', marginBottom: 10 }}>주소를 선택해주세요</Text>
-      )}
-
       <TouchableOpacity
         style={styles.searchButton}
         onPress={() =>
