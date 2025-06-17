@@ -121,10 +121,34 @@ export const getPaymentStatus = async () => {
   }
 };
 
+export const getPaymentStatusWithKey = async ({ id }: { id: string }) => {
+  try {
+    const res = await axiosUser.get('/payment/subscribe/status/key', {
+      params: { id },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('결제 상태 확인 실패:', error);
+    throw error;
+  }
+};
+
 /** ✅ 결제 URL 요청 */
 export const requestPaymentReady = async () => {
   try {
     const res = await axiosUser.post('/payment/ready');
+    return res.data;
+  } catch (error) {
+    console.error('결제 준비 요청 실패:', error);
+    throw error;
+  }
+};
+
+export const requestPaymentReadyWithKey = async ({ id }: { id: string }) => {
+  try {
+    const res = await axiosUser.post('/payment/ready/key', {
+      params: { id },
+    });
     return res.data;
   } catch (error) {
     console.error('결제 준비 요청 실패:', error);
@@ -142,6 +166,19 @@ export const cancelSubscription = async () => {
     throw error;
   }
 };
+
+export const cancelSubscriptionWithKey = async ({ id }: { id: string }) => {
+  try {
+    const res = await axiosUser.post('/payment/subscribe/cancel/key', {
+      params: { id },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('결제 해지 실패:', error);
+    throw error;
+  }
+};
+
 
 export const kakaoLoginWithCode = async (code: string) => {
   try {
