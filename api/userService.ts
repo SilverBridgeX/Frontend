@@ -1,7 +1,6 @@
 import { ROLE } from '@/constants/user';
 import axiosUser from '@/lib/axiosUser';
-import { getRefreshToken, setTokens } from '@/lib/tokenStorage';
-import { getAccessToken } from '@/lib/tokenStorage';
+import { getAccessToken, getRefreshToken, setTokens } from '@/lib/tokenStorage';
 import axios from 'axios';
 
 const BASE_URL = 'http://15.165.17.95/user';
@@ -285,3 +284,15 @@ export const getGuardianMyPage = async () => {
     throw error;
   }
 };
+
+/** ✅ 추천 활동 리스트 조회 API */
+export const getRecommendedActivities = async () => {
+  try {
+    const res = await axiosUser.get('/activities/recommend-activity');
+    return res.data.result.recommendActivityResDtos;
+  } catch (error) {
+    console.error('추천 활동 리스트 조회 실패:', error);
+    throw error;
+  }
+};
+

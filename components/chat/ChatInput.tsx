@@ -1,6 +1,8 @@
+import { getRecommendedActivities } from '@/api/userService';
 import { COLORS, FONT_SIZES, INPUT_HEIGHT, SHADOWS, SPACING } from '@/constants/theme';
 import { Message, Sender } from '@/types/chat';
 import React, { useEffect, useState } from 'react';
+
 import {
   FlatList,
   Image,
@@ -16,6 +18,7 @@ import {
 const Send = require('../../assets/images/btn_send.png');
 const ActivityIcon = require('../../assets/images/icon_activity.png');
 
+// 민감 정보 정규표현식
 const SENSITIVE_PATTERNS = [
   { type: '휴대폰 번호', regex: /01[016789]-?\d{3,4}-?\d{4}/ },
   { type: '주민등록번호', regex: /\d{6}-?[1-4]\d{6}/ },
@@ -24,11 +27,20 @@ const SENSITIVE_PATTERNS = [
   { type: '계좌번호', regex: /\d{2,3}-\d{2,6}-\d{6,8}/ },
 ];
 
+// 활동 태그에 따라 이미지 맵핑
 const categoryToImage: Record<string, any> = {
-  산책: require('../../assets/images/activity_walk.png'),
-  축제: require('../../assets/images/activity_festival.png'),
+  TOUR_SPOT: require('../../assets/images/activity_walk.png'),
+  FESTIVAL: require('../../assets/images/activity_festival.png'),
 };
 
+// ✅ 활동 제안 타입 정의
+interface ActivitySuggestion {
+  id: string;
+  name: string;
+  location: string;
+  time: string;
+  category: string;
+}
 
 interface Props {
   onSendMessage: (content: string) => void;
@@ -49,30 +61,49 @@ export default function ChatInput({
   userId,
   setMessages,
   prefillMessage,
-  onPrefillHandled
+  onPrefillHandled,
 }: Props) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [hasPrefilled, setHasPrefilled] = useState(false); 
+  const [hasPrefilled, setHasPrefilled] = useState(false);
 
-  const [text, setText] = useState('');
+  // ✅ activitySuggestions에 타입 명시
+  const [activitySuggestions, setActivitySuggestions] = useState<ActivitySuggestion[]>([]);
 
   useEffect(() => {
     if (prefillMessage && !hasPrefilled) {
-      setInput(prefillMessage);       // ✅ 입력창에 메시지 설정
-      setHasPrefilled(true);          // ✅ 더 이상 자동 반영되지 않도록 설정
+      setInput(prefillMessage);
+      setHasPrefilled(true);
       onPrefillHandled();
     }
   }, [prefillMessage, hasPrefilled]);
 
+  useEffect(() => {
+    if (showSuggestions) {
+      getRecommendedActivities()
+        .then((data) => {
+          const mapped = data.map((item: any, index: number) => ({
+            id: index.toString(),
+            name: item.name,
+            location: item.content,
+            time: item.address,
+            category: item.tag,
+          }));
+          setActivitySuggestions(mapped);
+        })
+        .catch((error) => {
+          console.error('추천 활동 불러오기 실패:', error);
+        });
+    }
+  }, [showSuggestions]);
 
-const send = () => {
-  if (!input.trim()) return;
-  onSendMessage(input);
-  setInput('');
-  setHasPrefilled(false); 
-  scrollToEnd();
-};
+  const send = () => {
+    if (!input.trim()) return;
+    onSendMessage(input);
+    setInput('');
+    setHasPrefilled(false);
+    scrollToEnd();
+  };
 
   const detectSensitiveInfo = (text: string) => {
     for (const pattern of SENSITIVE_PATTERNS) {
@@ -82,30 +113,6 @@ const send = () => {
       }
     }
   };
-
-  const activitySuggestions = [
-    {
-      id: '1',
-      name: '2024년 낙동강정원 벚꽃축제',
-      location: '낙동제방 벚꽃길 일원, 르네시떼 야외무대',
-      time: '2024. 3. 29.(금) ~ 3. 31.(일)',
-      category: '산책',
-    },
-    {
-      id: '2',
-      name: '2024년 낙동강정원 벚꽃축제',
-      location: '낙동제방 벚꽃길 일원, 르네시떼 야외무대',
-      time: '2024. 3. 29.(금) ~ 3. 31.(일)',
-      category: '축제',
-    },
-    {
-      id: '3',
-      name: '시장 보기',
-      location: '전통시장 입구',
-      time: '내일 오전 10시',
-      category: '축제',
-    },
-  ];
 
   return (
     <>
@@ -123,12 +130,18 @@ const send = () => {
             <FlatList
               data={activitySuggestions}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={{ paddingVertical: SPACING.lg, paddingHorizontal: SPACING.lg }}
+              contentContainerStyle={{
+                paddingVertical: SPACING.lg,
+                paddingHorizontal: SPACING.lg,
+              }}
               showsVerticalScrollIndicator
               renderItem={({ item }) => (
                 <View style={[styles.card, styles.shadowCard]}>
                   <View style={styles.cardTopRow}>
-                    <Image source={categoryToImage[item.category]} style={styles.cardImage} />
+                    <Image
+                      source={categoryToImage[item.category] ?? ActivityIcon}
+                      style={styles.cardImage}
+                    />
                     <Text style={styles.cardTitle}>{item.name}</Text>
                   </View>
                   <Text style={styles.cardLocation}>{item.location}</Text>
@@ -138,12 +151,12 @@ const send = () => {
             />
           </View>
         </View>
-      </Modal> 
+      </Modal>
 
       <View style={[styles.inputRow, styles.shadowInput]}>
         <Pressable onPress={() => setShowSuggestions(true)}>
           <Image source={ActivityIcon} style={styles.sendIcon} />
-        </Pressable> 
+        </Pressable>
 
         <TextInput
           style={styles.input}
@@ -156,10 +169,10 @@ const send = () => {
           placeholderTextColor="#666666"
           onFocus={scrollToEnd}
         />
-          <Pressable onPress={send}>
-            <Image source={Send} style={styles.sendIcon} />
-          </Pressable>
-        {/* )} */}
+
+        <Pressable onPress={send}>
+          <Image source={Send} style={styles.sendIcon} />
+        </Pressable>
       </View>
     </>
   );
@@ -185,23 +198,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginHorizontal: SPACING.sm,
-  },
-  recordingUI: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: SPACING.sm,
-  },
-  recordingText: {
-    fontSize: FONT_SIZES.small,
-    color: COLORS.orange,
-    marginLeft: 6,
-  },
-  playButton: {
-    marginRight: SPACING.sm,
-  },
-  playIcon: {
-    width: 24,
-    height: 24,
   },
   modalBackground: {
     flex: 1,
