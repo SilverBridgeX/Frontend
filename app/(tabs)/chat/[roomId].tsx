@@ -35,7 +35,9 @@ export default function ChatRoom() {
     socketList,
     socket,
     userId,
+    stepNum,
     setSimulationPersona,
+    setStepNum,
   } = useChatStore();
 
   const senderName = '나';
@@ -51,6 +53,7 @@ export default function ChatRoom() {
   const { sendMessage } = useChatSocket(roomId, userId, senderName, isSimulation);
   const [recommendedMessage, setRecommendedMessage] = useState<string | null>(null);
   const [prefill, setPrefill] = useState<string | null>(null); 
+  const { userRole } = useChatStore();
   const handlePrefillHandled = () => {
   setPrefill(null); // ✅ 입력창에 반영된 후 prefill 초기화
 };
@@ -117,7 +120,7 @@ export default function ChatRoom() {
     if (noReplyTimerRef.current) clearTimeout(noReplyTimerRef.current);
 
     noReplyTimerRef.current = setTimeout(() => {
-      handleNoReply(newMessage);
+      if (stepNum >= 10) handleNoReply(newMessage);
     }, 10000); // 10초 후 응답 없으면 API 호출
   };
 
