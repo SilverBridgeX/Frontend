@@ -1,8 +1,10 @@
+import { requestMyPageData } from '@/api/userService';
 import { COLORS, FONT_SIZES, SPACING } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const MenuItem = ({ icon, label, onPress }: { icon: any; label: string; onPress: () => void }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress}>
@@ -12,8 +14,28 @@ const MenuItem = ({ icon, label, onPress }: { icon: any; label: string; onPress:
   </TouchableOpacity>
 );
 
+
 export default function MyPageScreen() {
   const navigation: any = useNavigation();
+
+  const [name, setName] = useState('');
+  const [key, setKey] = useState('');
+  const [address, setAddress] = useState('');
+
+  const fetchMyPageData = async () => {
+    try {
+      const data = await requestMyPageData();
+      setName(data?.result?.nickname);
+      setKey(data?.result?.key);
+      setAddress(data?.result?.address);
+    } catch (error) {
+      Alert.alert('오류', '마이페이지 데이터를 불러오지 못했습니다.');
+      console.error(error);
+    }
+  }
+  useEffect(() => {
+    fetchMyPageData();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -25,17 +47,28 @@ export default function MyPageScreen() {
       {/* 사용자 정보 카드 */}
       <View style={styles.profileCard}>
         <Image source={{ uri: 'https://i.pravatar.cc/100?u=1' }} style={styles.avatar} />
-        <Text style={styles.name}>이순자</Text>
-        <Text style={styles.email}>lee@example.com</Text>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.key}>{key}</Text>
+        <Text style={styles.address}>{address}</Text>
       </View>
 
       {/* 메뉴 리스트 */}
       <View style={styles.menuContainer}>
-        <MenuItem icon="person-outline" label="프로필 수정" onPress={() => {}} />
-        <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => {}} />
-        <MenuItem icon="chatbubble-ellipses-outline" label="1:1 문의" onPress={() => {}} />
-        <MenuItem icon="log-out-outline" label="로그아웃" onPress={() => {}} />
+        <MenuItem
+          icon="person-outline"
+          label="마이페이지 수정"
+          onPress={() =>
+            router.push({
+              pathname: '/my-detail',
+              params: {
+                name: name ?? '',
+                address: address ?? '',
+              },
+            })
+          }
+        />
         <MenuItem icon="card-outline" label="프리미엄 결제" onPress={() => router.push('/payment')} />
+        <MenuItem icon="log-out-outline" label="로그아웃" onPress={() => router.push('/login')} />
       </View>
     </ScrollView>
   );
@@ -75,7 +108,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.black,
   },
-  email: {
+  key: {
+    fontSize: FONT_SIZES.small,
+    color: COLORS.gray,
+    marginTop: 4,
+  },
+  address: {
     fontSize: FONT_SIZES.small,
     color: COLORS.gray,
     marginTop: 4,

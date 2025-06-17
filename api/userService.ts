@@ -141,7 +141,42 @@ export const checkMatchingStatus = async (): Promise<boolean> => {
   }
 };
 
+/** ✅ 마이페이지 데이터 요청 */
+export const requestMyPageData = async () => {
+  try {
+    const res = await axiosUser.get('/members/mypage/older');
+    return res.data;
+  } catch (error) {
+    console.error('마이페이지 데이터 요청 실패:', error);
+    throw error;
+  }
+};
 
+/** ✅ 닉네임 변경  */
+export const updateNickname = async ({ nickname } : { nickname: string }) => {
+  try {
+    const res = await axiosUser.post('/members/nickname', {
+      nickname,
+    });
+    return res.data;
+  } catch (error) {
+    console.error('닉네임 변경 실패:', error);
+    throw error;
+  }
+};
+
+/** ✅ 주소 변경  */
+export const updateAddress = async ({ streetAddress } : { streetAddress: string }) => {
+  try {
+    const res = await axiosUser.post('/members/address', {
+      streetAddress,
+    });
+    return res.data;
+  } catch (error) {
+    console.error('주소 변경 실패:', error);
+    throw error;
+  }
+};
 
 /** ✅ 결제 상태 확인 */
 export const getPaymentStatus = async () => {
