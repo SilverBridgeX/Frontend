@@ -1,10 +1,11 @@
-import { cancelSubscription, getPaymentStatus, requestPaymentReady } from '@/api/userService';
+import { cancelSubscription, cancelSubscriptionWithKey, getPaymentStatus, getPaymentStatusWithKey, requestPaymentReady, requestPaymentReadyWithKey } from '@/api/userService';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking,
   StyleSheet, Text, TouchableOpacity, View
 } from 'react-native';
+import { useChatStore } from '@/store/chatStore';
 
 export default function PaymentScreen() {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
@@ -12,10 +13,16 @@ export default function PaymentScreen() {
   const [nextDate, setNextDate] = useState<string | null>(null);
   const [paymentURL, setPaymentURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { userRole, key } = useChatStore();
 
   const fetchStatus = async () => {
     try {
-      const data = await getPaymentStatus();
+      let data;
+      if (userRole === 'OLDER') {
+        data = await getPaymentStatus();
+      } else {
+        data = await getPaymentStatusWithKey({ id: key });
+      }
       const status = data?.result?.status;
       const approvedAt = data?.result?.last_approved_at;
 
@@ -44,7 +51,12 @@ export default function PaymentScreen() {
 
   const fetchPayment = async () => {
     try {
-      const data = await requestPaymentReady();
+      let data;
+      if (userRole === 'OLDER') {
+        data = await requestPaymentReady();
+      } else {
+        data = await requestPaymentReadyWithKey({ id: key });
+      }
       setPaymentURL(data?.result?.next_redirect_mobile_url);
     } catch (error) {
       Alert.alert('오류', '결제 URL을 불러오지 못했습니다.');
@@ -54,7 +66,11 @@ export default function PaymentScreen() {
 
   const handleCancel = async () => {
     try {
-      await cancelSubscription();
+      if (userRole === 'OLDER') {
+        await cancelSubscription();
+      } else {
+        await cancelSubscriptionWithKey({ id: key });
+      }
       Alert.alert('알림', '구독이 취소되었습니다.');
       fetchStatus(); // 다시 상태 갱신
     } catch (error) {

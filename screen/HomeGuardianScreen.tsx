@@ -1,12 +1,36 @@
+import { getGuardianMyPage } from '@/api/userService';
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
 import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet, Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function HomeGuardianScreen() {
   const router = useRouter();
   const { setIsRegisteringByGuardian } = useChatStore();
+  const [olderList, setOlderList] = useState<{ nickname: string; key: string }[]>([]);
+
+    // ✅ 보호자 마이페이지 데이터 불러오기
+  useEffect(() => {
+    const fetchOlderList = async () => {
+      try {
+        const res = await getGuardianMyPage();
+        setOlderList(res.result.olderInfoDtos || []);
+      } catch (error) {
+        Alert.alert('오류', '동행자 목록을 불러오는 데 실패했습니다.');
+      }
+    };
+
+    fetchOlderList();
+  }, []);
+
   //동행자 등록하기
   const handleRegisterOlder = () => {   
     setIsRegisteringByGuardian(true); // ✅ flag ON
@@ -31,6 +55,28 @@ export default function HomeGuardianScreen() {
         <TouchableOpacity style={styles.actionButton} onPress={handleLinkOlder}>
           <Text style={styles.actionText}>동행자 연결하기</Text>
         </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>연결된 동행자</Text>
+        <ScrollView style={styles.listContainer}>
+          {olderList.map((older, index) => (
+            <View key={index} style={styles.olderItem}>
+              <Image
+                source={{ uri: 'https://via.placeholder.com/40' }}
+                style={styles.profileImage}
+              />
+              <View style={styles.olderInfo}>
+                <Text style={styles.nickname}>{older.nickname}</Text>
+                <Text style={styles.key}>{older.key}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.payButton}
+                
+              >
+                <Text style={styles.payButtonText}>결제하기</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
@@ -57,6 +103,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: SPACING.lg,
     paddingTop: 40,
+    flex: 1,
   },
   actionButton: {
     backgroundColor: COLORS.lightLemon,
@@ -70,5 +117,47 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.title + 4,
     color: COLORS.black,
     fontWeight: 'bold',
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.title,
+    fontWeight: 'bold',
+    marginBottom: SPACING.sm,
+    marginTop: 16,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  olderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: SPACING.md,
+  },
+  olderInfo: {
+    flex: 1,
+  },
+  nickname: {
+    fontSize: FONT_SIZES.small,
+    fontWeight: 'bold',
+  },
+  key: {
+    fontSize: FONT_SIZES.small,
+    color: "#666666",
+  },
+  payButton: {
+    backgroundColor: COLORS.orange,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: RADIUS.medium,
+  },
+  payButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: FONT_SIZES.small,
   },
 });
