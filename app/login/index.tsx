@@ -82,6 +82,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="ID를 입력해주세요"
+            placeholderTextColor="#666666"
             value={id}
             onChangeText={setId}
           />
