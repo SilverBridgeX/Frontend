@@ -148,7 +148,7 @@ export default function ChatRoom() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 5 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 25}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1, backgroundColor: COLORS.white }}>

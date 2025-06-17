@@ -132,12 +132,12 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
 
-        <View style={styles.sectionHeader}>
+        {/* <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>최근 채팅</Text>
           <TouchableOpacity style={styles.simulationButton} onPress={handleCreateSimulationRoom}>
             <Text style={styles.simulationButtonText}>연습모드방 만들기</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {chatRooms.map((room) => (
           <TouchableOpacity
