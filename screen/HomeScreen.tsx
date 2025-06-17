@@ -1,10 +1,11 @@
 import { createSimulationRoom } from '@/api/aiService';
 import { checkMatchingStatus, requestMatching } from '@/api/userService';
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
+import { chatService } from '@/api/chatService';
 import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
 
 const chatRooms = [
   { id: '1', name: '김순이', message: '오늘 날씨 참 좋네요 ☀️', time: '오전 9:30', avatar: 'https://i.pravatar.cc/100?u=1' },
@@ -14,7 +15,8 @@ const chatRooms = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { userId, userName, userGender } = useChatStore();
+  const { userId, userName, userGender, setStepNum } = useChatStore();
+  const [chatRooms, setChatRooms] = useState<any[]>([]);
 
   const [countdown, setCountdown] = useState('');
   const [buttonState, setButtonState] = useState<'idle' | 'waiting'>('waiting');
@@ -35,6 +37,18 @@ export default function HomeScreen() {
         setButtonState('idle');
         setCountdown('');
       });
+  }, []);
+
+  useEffect(() => {
+    const loadRooms = async () => {
+      try {
+        const rooms = await chatService.fetchChatRoomList();
+        setChatRooms(rooms);
+      } catch (error) {
+        console.error('채팅방 목록 로딩 실패:', error);
+      }
+    };
+    loadRooms();
   }, []);
 
   const handleCreateSimulationRoom = async () => {
@@ -139,20 +153,38 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View> */}
 
-        {chatRooms.map((room) => (
-          <TouchableOpacity
-            key={room.id}
-            style={styles.chatRoom}
-            onPress={() => router.push(`/chat/${room.id}`)}
-          >
-            <Image source={{ uri: room.avatar }} style={styles.avatar} />
-            <View style={styles.chatInfo}>
-              <Text style={styles.chatName}>{room.name}</Text>
-              <Text style={styles.chatMessage}>{room.message}</Text>
-            </View>
-            <Text style={styles.chatTime}>{room.time}</Text>
-          </TouchableOpacity>
-        ))}
+        <FlatList
+          data={chatRooms}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => {
+            const latest = item.latestMessage;
+            const participant = item.participants?.[0]?.name ?? '알 수 없음';
+            return (
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => {
+                  setStepNum(item.stepNum);
+                  router.push({
+                    pathname: '/chat/[roomId]',
+                    params: {
+                      roomId: item._id,
+                      isSimulation: item.isSimulation?.toString(), // boolean → string 변환 필요
+                    },
+                  })
+                }}
+              >
+                <Image source={{ uri: 'https://i.pravatar.cc/100?u=' + item._id }} style={styles.avatar2} />
+                <View style={styles.info}>
+                  <Text style={styles.name}>{participant}</Text>
+                  <Text style={styles.message} numberOfLines={1}>{latest?.content ?? '메시지 없음'}</Text>
+                </View>
+                <Text style={styles.time}>
+                  {latest?.createdAt ? new Date(latest.createdAt).toLocaleDateString() : ''}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
       </ScrollView>
     </View>
   );
@@ -245,5 +277,32 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xl,
     marginBottom: SPACING.md,
     marginHorizontal: SPACING.md,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderColor: COLORS.white,
+  },
+  avatar2: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.full,
+    marginRight: SPACING.md,
+  },
+  info: { flex: 1 },
+  name: {
+    fontWeight: 'bold',
+    fontSize: FONT_SIZES.title,
+  },
+  message: {
+    color: COLORS.black,
+    fontSize: FONT_SIZES.small,
+  },
+  time: {
+    color: COLORS.black,
+    fontSize: FONT_SIZES.xsmall,
+    marginLeft: SPACING.sm,
   },
 });
