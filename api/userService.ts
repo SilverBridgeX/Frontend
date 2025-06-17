@@ -191,3 +191,14 @@ export const linkOlderToGuardian = async (olderKey: string) => {
     throw error;
   }
 };
+
+/** ✅ 보호자 연결 노인 조회 */
+export const getGuardianMyPage = async () => {
+  try {
+    const res = await axiosUser.get('/members/mypage/guardian');
+    return res.data;
+  } catch (error) {
+    console.error('보호자 연결 노인 조회 실패:', error);
+    throw error;
+  }
+};

@@ -1,17 +1,20 @@
 import { COLORS, FONT_SIZES, RADIUS, SHADOWS, SPACING } from '@/constants/theme';
+import { useChatStore } from '@/store/chatStore';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeGuardianScreen() {
   const router = useRouter();
+  const { setIsRegisteringByGuardian } = useChatStore();
   //동행자 등록하기
-  const handleRegisterOlder = () => {
-    
+  const handleRegisterOlder = () => {   
+    setIsRegisteringByGuardian(true); // ✅ flag ON
+    router.push('/login/join');       // ✅ join으로 이동
   };
   //동행자 연결하기 
   const handleLinkOlder = () => {
-    
+    router.push('/link');
   };
 
   return (

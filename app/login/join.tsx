@@ -1,50 +1,77 @@
 // screens/SignupScreen.tsx
-import { socialLogin } from '@/api/userService';
+import { registerOlderByGuardian, socialLogin } from '@/api/userService';
 import { COLORS } from '@/constants/theme';
-import { ROLE } from '@/constants/user';
+import { goToHomeAndConnectSocket } from '@/lib/goToHomeAndConnectSocket';
+import { useChatStore } from '@/store/chatStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SignupScreen() {
-  const { email: emailParam, role: roleParam } = useLocalSearchParams<{
+  const { email: emailParam} = useLocalSearchParams<{
     email?: string;
-    role?: string;
   }>();
 
+  const { userRole, isRegisteringByGuardian, setIsRegisteringByGuardian } = useChatStore();
   const router = useRouter();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [role, setRole] = useState(roleParam === ROLE.OLDER_PROTECTER ? ROLE.OLDER_PROTECTER : ROLE.OLDER);
+
+  useEffect(() => {
+    return () => {
+      setIsRegisteringByGuardian(false); // ✅ 화면 벗어날 때 초기화
+    };
+  }, []);  
 
   const handleComplete = async () => {
+
     try {
-      if (!emailParam) {
-        alert('이메일 정보가 없습니다.');
-        return;
-      }
 
-      const response = await socialLogin({
-        role,
-        email: emailParam,
-        nickname: name,
-        streetAddress: address,
-      });
+      let response;
 
-      if (response.isSuccess) {
-        console.log('회원가입 성공! accessToken:', response.result.accessToken);
-        router.replace({
-          pathname: '/home',
-          params: { role },
+      if (isRegisteringByGuardian) {
+        response = await registerOlderByGuardian({
+          email: 'test',
+          nickname: name,
+          streetAddress: address,
         });
-        alert('회원가입 성공! 홈 화면으로 이동합니다.');
+
+        if (response.isSuccess) {
+          console.log('동행자 등록 성공! accessToken:', response.result.accessToken);
+          router.replace('/home');
+
+          alert('동행자 등록 성공! 홈 화면으로 이동합니다.');
+        } else {
+          router.replace('/home');
+          alert('동행자 등록 실패: ' + response.message);
+        }
       } else {
-        router.replace('/login');
-        alert('회원가입 실패: ' + response.message);
+        if (!emailParam) {
+          alert('이메일 정보가 없습니다.');
+          return;
+        }
+        response = await socialLogin({
+          role: userRole,
+          email: emailParam,
+          nickname: name,
+          streetAddress: address,
+        });
+
+        if (response.isSuccess) {
+          console.log('회원가입 성공! accessToken:', response.result.accessToken);
+          await goToHomeAndConnectSocket();
+          router.replace('/home');
+
+          alert('회원가입 성공! 홈 화면으로 이동합니다.');
+        } else {
+          router.replace('/login');
+          alert('회원가입 실패: ' + response.message);
+        }
       }
+
     } catch (error) {
       alert('에러 발생: ' + error);
-    }
+    } 
   };
 
   return (

@@ -2,6 +2,8 @@
 import { loginWithKey } from '@/api/userService'; // 로그인 API 호출 함수
 import { COLORS, SHADOWS } from '@/constants/theme';
 import { ROLE } from '@/constants/user';
+import { goToHomeAndConnectSocket } from '@/lib/goToHomeAndConnectSocket';
+import { useChatStore } from '@/store/chatStore';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,7 +11,8 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 export default function LoginScreen() {
   const [id, setId] = useState('');
   const [role, setRole] = useState(ROLE.OLDER); // 기본 역할을 '동행자'로 설정
-  
+  const { setUserRole } = useChatStore();
+
   const handleLogin = async () => {
     if (!id.trim()) {
       alert('ID를 입력해주세요!');
@@ -24,7 +27,8 @@ export default function LoginScreen() {
 
         // 예: 토큰 저장 (AsyncStorage 등으로)
         // await AsyncStorage.setItem('accessToken', response.result.accessToken);
-
+        setUserRole(role) // ✅ 전역 저장
+        await goToHomeAndConnectSocket();
         router.push('/home');
       } else {
         alert(`로그인 실패: ${response.message}`);
@@ -82,7 +86,9 @@ export default function LoginScreen() {
             onChangeText={setId}
           />
 
-          <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+          <TouchableOpacity onPress={
+              handleLogin
+            } style={styles.loginButton}>
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
 
@@ -92,9 +98,9 @@ export default function LoginScreen() {
       <TouchableOpacity
         onPress={() =>{
           console.log('카카오 버튼 클릭됨')
+          setUserRole(role); // ✅ 전역 저장
           router.push({
-            pathname: '/login/kakao-login',
-            params: { role }, // ← 선택된 역할 함께 넘김
+            pathname: '/login/kakao-login'
           })
         }}
         style={styles.kakaoButton}

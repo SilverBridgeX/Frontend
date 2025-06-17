@@ -14,6 +14,7 @@ interface ChatState {
   userName:string;
   userGender:string;
   userRole: typeof ROLE[keyof typeof ROLE];
+  isRegisteringByGuardian: boolean;
 
   setSocketList: (msg: Message) => void;
   setRecentTopicList: (msg: Message) => void;
@@ -25,6 +26,7 @@ interface ChatState {
   setSocket: (socket: Socket) => void;
   setSimulationPersona: (persona: any) => void;
   setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => void;
+  setIsRegisteringByGuardian: (val: boolean) => void;
   
 }
 
@@ -39,6 +41,8 @@ export const useChatStore = create<ChatState>((set) => ({
   socket: null as unknown as Socket,
   simulationPersona: null,
   userRole: '',
+  isRegisteringByGuardian: false,
+
 
   setSocketList: (msg) =>
     set((state) => ({
@@ -81,5 +85,7 @@ export const useChatStore = create<ChatState>((set) => ({
   setSimulationPersona: (persona) => set({ simulationPersona: persona }),
 
   setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => set({ userRole: role }),
+
+  setIsRegisteringByGuardian: (val: boolean) => set({ isRegisteringByGuardian: val }),
 
 }));
