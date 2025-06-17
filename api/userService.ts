@@ -28,16 +28,27 @@ export const socialLogin = async ({
   nickname: string;
   streetAddress: string;
 }) => {
+  console.log(role);
+  console.log(email);
+  console.log(nickname);
+  console.log(streetAddress);
   try {
-    const response = await axios.post(`${BASE_URL}/members/social/login`, {
+    
+    const response = await axiosUser.post(`${BASE_URL}/members/social/sign-in`, {
       role,
       email,
       nickname,
       streetAddress,
     });
+
+    const { accessToken, refreshToken } = response.data.result;
+
+    // ✅ AsyncStorage에 토큰 저장
+    await setTokens(accessToken, refreshToken);
+    
     return response.data;
   } catch (error) {
-    console.error('소셜 로그인 실패:', error);
+    console.error('회원가입 실패:', error);
     throw error;
   }
 };
@@ -65,6 +76,7 @@ export const loginWithKey = async (key: string) => {
 export const reissueToken = async () => {
   try {
     const refreshToken = await getRefreshToken();
+    //console.log('리프레시 토큰큰', error);
 
     const response = await axios.post(`${BASE_URL}/members/reissue`, null, {
       headers: {
@@ -133,13 +145,49 @@ export const cancelSubscription = async () => {
 
 export const kakaoLoginWithCode = async (code: string) => {
   try {
-    console.log('카카오 로그인 실패:', code);
+    console.log('카카오 로그인', code);
     const res = await axiosUser.get('/members/code/kakao', {
       params: { code },
     });
     return res.data;
   } catch (error) {
     console.error('카카오 로그인 실패:', error);
+    throw error;
+  }
+};
+
+//보호자 api
+export const registerOlderByGuardian = async ({
+  email,
+  nickname,
+  streetAddress,
+}: {
+  email: string;
+  nickname: string;
+  streetAddress: string;
+}) => {
+  try {
+    const res = await axiosUser.post('/members/guardians/olders', {
+      role: 'OLDER',
+      email,
+      nickname,
+      streetAddress,
+    });
+    return res.data;
+  } catch (error) {
+    console.error('노인 등록 실패:', error);
+    throw error;
+  }
+};
+
+export const linkOlderToGuardian = async (olderKey: string) => {
+  try {
+    const res = await axiosUser.post('/members/guardians/older-links', null, {
+      params: { olderKey },
+    });
+    return res.data;
+  } catch (error) {
+    console.error('노인 연결 실패:', error);
     throw error;
   }
 };

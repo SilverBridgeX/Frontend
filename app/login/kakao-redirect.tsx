@@ -13,7 +13,9 @@ export default function KakaoLoginRedirect() {
         console.log('🔑 전달받은 인가 코드:', token);
         const response = await kakaoLoginWithCode(token as string);
 
-        const { user, email } = response.result;
+        console.log(response.result);
+
+        const { email, user } = response.result;
 
         if (user === false) {
           // 회원가입 화면으로 이동하며 이메일 전달
@@ -26,7 +28,11 @@ export default function KakaoLoginRedirect() {
           });
         } else {
           // 이미 가입된 유저 → 홈으로 이동
-          router.replace('/home');
+          console.log(role);
+          router.replace({
+            pathname: '/home',
+            params: { role },
+          });
         }
       } catch (err) {
         console.error('카카오 로그인 실패:', err);

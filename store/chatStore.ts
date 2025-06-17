@@ -1,3 +1,4 @@
+import { ROLE } from '@/constants/user';
 import { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { Message } from '../types/chat';
@@ -11,7 +12,8 @@ interface ChatState {
   userId: string; 
   simulationPersona: any;
   userName:string;
-  userGender:string
+  userGender:string;
+  userRole: typeof ROLE[keyof typeof ROLE];
 
   setSocketList: (msg: Message) => void;
   setRecentTopicList: (msg: Message) => void;
@@ -22,6 +24,8 @@ interface ChatState {
   setInitialStepNum: (step: number) => void;
   setSocket: (socket: Socket) => void;
   setSimulationPersona: (persona: any) => void;
+  setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => void;
+  
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -34,6 +38,7 @@ export const useChatStore = create<ChatState>((set) => ({
   stepNum: 0,
   socket: null as unknown as Socket,
   simulationPersona: null,
+  userRole: '',
 
   setSocketList: (msg) =>
     set((state) => ({
@@ -74,4 +79,7 @@ export const useChatStore = create<ChatState>((set) => ({
     })),
 
   setSimulationPersona: (persona) => set({ simulationPersona: persona }),
+
+  setUserRole: (role: typeof ROLE[keyof typeof ROLE]) => set({ userRole: role }),
+
 }));
