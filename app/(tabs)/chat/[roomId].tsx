@@ -59,18 +59,25 @@ export default function ChatRoom() {
   setPrefill(null); // ✅ 입력창에 반영된 후 prefill 초기화
 };
 
-
-  if (roomId && userId && senderName) {
-    useChatInitializer(roomId, userId, senderName);
+  const scrollToEnd = () => {
+    if (socketList.length>0){
+      listRef.current?.scrollToIndex({
+        index: socketList.length-1,
+        animated:true
+      })
+    }
+    
   }
 
-  const scrollToEnd = () => listRef.current?.scrollToEnd({ animated: true });
+  if (roomId && userId && senderName) {
+    useChatInitializer(roomId, userId, senderName);                                                                                                                                                      
+  }
 
   useEffect(() => {
     chatService.getStepNum(roomId)
-        .then((stepNum) => {
+        .then((res) => {
           console.log('🧠 stepNum:', stepNum);
-          setStepNum(stepNum); // store에 저장
+          setStepNum(res.stepNUm); // store에 저장
         })
         .catch((err) => {
           console.error('❌ stepNum 로딩 실패:', err);
