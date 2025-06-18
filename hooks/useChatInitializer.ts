@@ -25,7 +25,7 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
       try {
         const messages = await chatService.fetchChatHistory(roomId, userId);
 
-        console.log('📥 수신한 메시지:', messages);
+        // console.log('📥 수신한 메시지:', messages);
 
         resetTopicLists();
         resetSocketList();

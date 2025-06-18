@@ -49,7 +49,7 @@ export default function ChatRoom() {
   const noReplyTimerRef = useRef<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
+  // console.log('🔥 UI에서 사용하는 메시지 리스트:', socketList);
 
   const { sendMessage } = useChatSocket(roomId, userId, senderName, isSimulation);
   const [recommendedMessage, setRecommendedMessage] = useState<string | null>(null);
@@ -115,9 +115,11 @@ export default function ChatRoom() {
   }, [roomId, isSimulation, setSimulationPersona]);
 
   const handleFocus = () => {
+    console.log("yeyeyeyeyeye")
     if (noReplyTimerRef.current) clearTimeout(noReplyTimerRef.current);
 
     noReplyTimerRef.current = setTimeout(() => {
+      console.log("hdhasdhh")
       if (stepNum >= 10) handleNoReply();
     }, 10000); // 10초 후 응답 없으면 API 호출
   };

@@ -31,7 +31,7 @@ export const chatService = {
       const response = await axiosChat.get('/message/list', {
         params: { roomId },
       });
-      console.log(`✅ 채팅 히스토리 (${roomId}) 응답:`, response.data);
+      // console.log(`✅ 채팅 히스토리 (${roomId}) 응답:`, response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ 채팅 히스토리 (${roomId}) 로딩 실패:`, error);
