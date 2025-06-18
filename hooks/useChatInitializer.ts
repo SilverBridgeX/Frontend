@@ -14,7 +14,6 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
     setAIList,
     resetTopicLists,
     resetSocketList,
-    setStepNum
   } = useChatStore();
 
   useEffect(() => {
@@ -51,8 +50,7 @@ export const useChatInitializer = (roomId: string, userId: string, senderName: s
           if (msg.isIceBreaker) {
             setAIList(msg);
           }
-        });
-        setStepNum(iceBreakingAIList.length > 0 ? iceBreakingAIList.length : 1);
+        }); 
 
       } catch (err) {
         console.error('❌ 채팅 기록 초기화 실패:', err);

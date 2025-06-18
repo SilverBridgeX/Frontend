@@ -18,6 +18,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
+  Alert,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -66,6 +67,17 @@ export default function ChatRoom() {
   const scrollToEnd = () => listRef.current?.scrollToEnd({ animated: true });
 
   useEffect(() => {
+    chatService.getStepNum(roomId)
+        .then((stepNum) => {
+          console.log('🧠 stepNum:', stepNum);
+          setStepNum(stepNum); // store에 저장
+        })
+        .catch((err) => {
+          console.error('❌ stepNum 로딩 실패:', err);
+        });
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       console.log('📤 방을 진짜로 나갑니다');
       // leave 이벤트 보냄
@@ -102,6 +114,14 @@ export default function ChatRoom() {
     }
   }, [roomId, isSimulation, setSimulationPersona]);
 
+  const handleFocus = () => {
+    if (noReplyTimerRef.current) clearTimeout(noReplyTimerRef.current);
+
+    noReplyTimerRef.current = setTimeout(() => {
+      if (stepNum >= 10) handleNoReply();
+    }, 10000); // 10초 후 응답 없으면 API 호출
+  };
+
   const handleSendMessage = (content: string) => {
     const newMessage: Message = {
       roomId,
@@ -116,19 +136,9 @@ export default function ChatRoom() {
 
     sendMessage(content);
     // ✅ 메시지는 socket에서 받도록 하며 직접 저장은 하지 않음
-
-    if (noReplyTimerRef.current) clearTimeout(noReplyTimerRef.current);
-
-    noReplyTimerRef.current = setTimeout(() => {
-      if (stepNum >= 10) handleNoReply(newMessage);
-    }, 10000); // 10초 후 응답 없으면 API 호출
   };
 
-  const handleNoReply = async(lastMsg: Message) => {
-    const isWaitingForMe = !lastMsg.isMyMessage;
-    const waitingTarget = isWaitingForMe ? '나의' : '상대의';
-    console.log(`🚨 30초 동안 ${waitingTarget} 응답 없음 → API 호출!`);
-
+  const handleNoReply = async() => {
     try {
       const { message } = await getAssistantMessage(Number(userId), roomId);
       if (message) {
@@ -176,6 +186,7 @@ export default function ChatRoom() {
           )}
 
           <ChatInput
+            onFocus={handleFocus}
             onSendMessage={handleSendMessage} // ✅ 여기서만 호출
             scrollToEnd={scrollToEnd}
             roomId={roomId}

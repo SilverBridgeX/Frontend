@@ -15,7 +15,7 @@ const chatRooms = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { userId, userName, userGender, setStepNum } = useChatStore();
+  const { userId, userName, userGender } = useChatStore();
   const [chatRooms, setChatRooms] = useState<any[]>([]);
 
   const [countdown, setCountdown] = useState('');
@@ -162,7 +162,6 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.row}
               onPress={() => {
-                setStepNum(item.stepNum);
                 router.push({
                   pathname: '/chat/[roomId]',
                   params: {

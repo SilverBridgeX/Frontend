@@ -64,4 +64,17 @@ export const chatService = {
       throw error;
     }
   },
+
+  // 5. stepNum 불러오기
+  async getStepNum(roomId: string) {
+    try {
+      const response = await axiosChat.get('/room/stepNum', {
+        params: { roomId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('stepNum 요청 실패:', error);
+      throw error;
+    }
+  },
 };

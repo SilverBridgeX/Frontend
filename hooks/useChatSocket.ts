@@ -9,9 +9,11 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
 
   const {
     socket,
+    stepNum,
     setSocketList,
     setRecentTopicList,
     setAIList,
+    setStepNum,
   } = useChatStore();
 
   const { handleAIFlow } = useAIChatFlow(roomId, isSimulation);
@@ -30,7 +32,10 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
     setRecentTopicList(message);
 
     //AI면 AI리스트에 메세지 추가 
-    if (message.isIceBreaker) setAIList(message);
+    if (message.isIceBreaker) {
+      setStepNum(stepNum + 1);
+      setAIList(message);
+    }
 
     }, [setSocketList, setRecentTopicList, setAIList, handleAIFlow, senderName]
   );
@@ -72,7 +77,7 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
       message: content,
     });
 
-    handleAIFlow();
+    if (stepNum < 10) handleAIFlow();
 
   };
 

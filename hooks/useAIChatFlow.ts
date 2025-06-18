@@ -11,7 +11,6 @@ export const useAIChatFlow = (roomId: string, isSimulation: string) => {
     setSocketList,
     socketList,
     stepNum,
-    setStepNum,
     resetTopicLists,
     simulationPersona, // store에서 가져옴
   } = useChatStore.getState();
@@ -55,7 +54,6 @@ export const useAIChatFlow = (roomId: string, isSimulation: string) => {
         });
 
         if (aiResponse.state === 'switch') {
-          setStepNum(stepNum + 1);
           resetTopicLists();
           socket.emit('messageIB', {
             roomId,

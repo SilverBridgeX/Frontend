@@ -15,7 +15,6 @@ const chatRooms = [
 export default function ChatList() {
   const router = useRouter();
   const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const { setStepNum } = useChatStore();
 
   useEffect(() => {
     const loadRooms = async () => {
@@ -42,7 +41,6 @@ export default function ChatList() {
             <TouchableOpacity
               style={styles.row}
               onPress={() => {
-                setStepNum(item.stepNum);
                 router.push({
                   pathname: '/chat/[roomId]',
                   params: {

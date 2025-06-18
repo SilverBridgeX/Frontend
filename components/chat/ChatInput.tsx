@@ -43,6 +43,7 @@ interface ActivitySuggestion {
 }
 
 interface Props {
+  onFocus: (content: string) => void;
   onSendMessage: (content: string) => void;
   scrollToEnd: () => void;
   roomId: string;
@@ -54,6 +55,7 @@ interface Props {
 }
 
 export default function ChatInput({
+  onFocus,
   onSendMessage,
   scrollToEnd,
   roomId,
@@ -177,7 +179,10 @@ export default function ChatInput({
           }}
           placeholder="메시지를 입력하세요"
           placeholderTextColor="#666666"
-          onFocus={scrollToEnd}
+          onFocus={() => {
+            scrollToEnd();     // 기존 동작 유지
+            onFocus(input);    // ✅ 부모에서 전달한 onFocus도 호출
+          }}
         />
 
         <Pressable onPress={send}>
