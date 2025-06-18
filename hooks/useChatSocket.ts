@@ -33,7 +33,9 @@ export const useChatSocket = (roomId: string, userId: string, senderName: string
 
     //AI면 AI리스트에 메세지 추가 
     if (message.isIceBreaker) {
-      setStepNum(stepNum + 1);
+      useChatStore.setState((state) => ({
+        stepNum: state.stepNum + 1,
+      }));
       setAIList(message);
     }
 
